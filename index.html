@@ -131,6 +131,29 @@
             line-height: 1.8;
         }
 
+        /* 抽棋進度提示列 */
+        .draw-status-bar {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #8b0000;
+            background-color: #f7ebe1;
+            border: 1px solid #e2cbb8;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .draw-status-bar .latest-piece {
+            color: #5a3e1b;
+            font-size: 15px;
+        }
+
         .pool-container {
             display: flex;
             flex-wrap: wrap;
@@ -432,6 +455,24 @@
             box-sizing: border-box;
         }
 
+        /* 右上方 ✖ 關閉按鈕 */
+        .modal-close-x {
+            position: absolute;
+            top: 12px;
+            right: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #888;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s;
+            user-select: none;
+        }
+
+        .modal-close-x:hover {
+            color: #333;
+        }
+
         .modal-title {
             font-size: 20px;
             font-weight: bold;
@@ -555,6 +596,12 @@
         唸完即可開始抽棋子
     </div>
 
+    <!-- 抽棋進度與狀態提示列 -->
+    <div class="draw-status-bar">
+        <span>🎯 抽棋進度：<span id="draw-count">0</span> / 32</span>
+        <span class="latest-piece" id="latest-piece-info">點選金棋開始抽盤</span>
+    </div>
+
     <!-- 待抽區：32張蓋著的金棋 -->
     <div class="pool-container" id="pool-area"></div>
 
@@ -638,9 +685,10 @@
     </div>
 </div>
 
-<!-- 彈出圖片儲存視窗 Image Modal -->
+<!-- 彈出圖片儲存視窗 Image Modal (含右上方 ✖ 按鈕) -->
 <div id="image-modal" class="modal-overlay" onclick="closeImageModal(event)">
     <div class="modal-content" style="max-width: 90%;" onclick="event.stopPropagation()">
+        <span class="modal-close-x" onclick="closeImageModalDirect()">&times;</span>
         <div class="modal-title">📱 請長按下方圖片即可儲存至手機相簿</div>
         <div class="modal-img-wrapper">
             <img id="generated-image" src="" alt="象棋卜卦命盤">
@@ -755,6 +803,9 @@
         currentDrawOrder = 1;
         firstPieceData = null;
 
+        document.getElementById('draw-count').innerText = "0";
+        document.getElementById('latest-piece-info').innerText = "點選金棋開始抽盤";
+
         syncUserInfoDisplay();
         renderPoolArea();
         renderBoardArea();
@@ -807,7 +858,7 @@
         document.getElementById('custom-alert-modal').style.display = 'none';
     }
 
-    // 檢查必填欄位驗證（條列式提示）
+    // 檢查必填欄位驗證
     function validateFormFields(checkEmail = false) {
         const missingFields = [];
 
@@ -869,11 +920,21 @@
 
         placePieceOnBoard(currentDrawOrder, pieceData);
 
+        // 更新進度條文字
+        document.getElementById('draw-count').innerText = currentDrawOrder;
+        document.getElementById('latest-piece-info').innerText = `最新抽取：[ ${pieceData.text} ]`;
+
         currentDrawOrder++;
 
         if (currentDrawOrder === 33) {
             placePieceOnBoard(33, firstPieceData);
+            document.getElementById('latest-piece-info').innerText = "✨ 抽取完成！命盤已生成";
             setButtonsDisabled(false);
+
+            // 抽完 32 支自動平滑捲動至命盤區塊
+            setTimeout(() => {
+                document.getElementById('chart-area').scrollIntoView({ behavior: 'smooth' });
+            }, 300);
         }
     }
 
@@ -989,7 +1050,8 @@
                 btnElem.innerText = originalText;
                 setButtonsDisabled(false);
             }, function(error) {
-                showCustomAlert("❌ 傳送失敗，請稍後再試或聯繫客服。");
+                // 更新後錯誤提示
+                showCustomAlert("❌ 傳送失敗，請聯繫凱特：kate@katesuncourse.com");
                 btnElem.innerText = originalText;
                 setButtonsDisabled(false);
             });
