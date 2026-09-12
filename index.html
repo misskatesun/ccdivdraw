@@ -21,8 +21,14 @@
             --border-color: #ccc;
             --gold-gradient: linear-gradient(135deg, #ffe066 0%, #d4af37 50%, #aa7c11 100%);
             --gold-border: #8a640f;
-            --green-btn-color: #2e7d32;
-            --green-btn-hover: #1b5e20;
+            
+            /* 莫蘭迪色系定義 */
+            --morandi-green: #768A76;       /* 莫蘭迪鼠尾草綠 (下載圖片) */
+            --morandi-green-hover: #637563;
+            --morandi-blue: #6B8299;        /* 莫蘭迪霧灰藍 (傳送給凱特) */
+            --morandi-blue-hover: #586B7E;
+            --morandi-orange: #E0A98B;      /* 莫蘭迪淡橘 (點此訂購) */
+            --morandi-orange-hover: #CB9477;
         }
 
         body {
@@ -160,39 +166,36 @@
         }
 
         button {
-            background-color: var(--primary-color);
-            color: white;
             border: none;
             padding: 12px 24px;
             font-size: 17px;
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12);
             transition: all 0.2s;
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            color: white;
         }
 
-        button:hover {
-            background-color: #a00000;
+        /* 莫蘭迪綠色（下載命盤圖片） */
+        button.btn-png {
+            background-color: var(--morandi-green);
+        }
+        button.btn-png:hover {
+            background-color: var(--morandi-green-hover);
             transform: translateY(-1px);
         }
 
-        /* 綠色「下載命盤圖片」按鈕 */
-        button.btn-png {
-            background-color: var(--green-btn-color);
-        }
-        button.btn-png:hover {
-            background-color: var(--green-btn-hover);
-        }
-
+        /* 莫蘭迪藍色（付費個案傳送命盤） */
         button.btn-email {
-            background-color: #2b5797;
+            background-color: var(--morandi-blue);
         }
         button.btn-email:hover {
-            background-color: #1e3d6b;
+            background-color: var(--morandi-blue-hover);
+            transform: translateY(-1px);
         }
 
         button:disabled {
@@ -211,31 +214,40 @@
             max-width: 90%;
         }
 
-        /* 訂購個案服務按鈕區塊 */
+        /* 訂購個案服務區塊 */
         .order-service-block {
-            margin-top: 18px;
-            text-align: center;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .order-title-text {
+            font-size: 16px;
+            font-weight: bold;
+            color: #4a3b32;
         }
 
         .order-btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%);
+            background-color: var(--morandi-orange);
             color: #ffffff;
             text-decoration: none;
             font-size: 16px;
             font-weight: bold;
-            padding: 12px 24px;
-            border-radius: 30px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            padding: 10px 24px;
+            border-radius: 25px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.12);
             transition: all 0.2s;
         }
 
         .order-btn:hover {
+            background-color: var(--morandi-orange-hover);
             transform: translateY(-2px);
-            box-shadow: 0 6px 14px rgba(0,0,0,0.2);
-            background: linear-gradient(135deg, #e5be48 0%, #bb8d22 100%);
+            box-shadow: 0 5px 12px rgba(0,0,0,0.18);
         }
 
         #chart-area {
@@ -557,8 +569,9 @@
             📧 個案請點擊「付費個案傳送命盤給凱特」直接寄出結果
         </div>
         <div class="order-service-block">
+            <div class="order-title-text">想要請凱特解讀＋療癒建議嗎？</div>
             <a href="https://www.katesunhealing.com/service" target="_blank" class="order-btn">
-                👉 點此訂購個案服務（凱特解讀＋療癒建議）
+                👉 點此訂購
             </a>
         </div>
     </div>
@@ -591,8 +604,9 @@
             📧 個案請點擊「付費個案傳送命盤給凱特」直接寄出結果
         </div>
         <div class="order-service-block">
+            <div class="order-title-text">想要請凱特解讀＋療癒建議嗎？</div>
             <a href="https://www.katesunhealing.com/service" target="_blank" class="order-btn">
-                👉 點此訂購個案服務（凱特解讀＋療癒建議）
+                👉 點此訂購
             </a>
         </div>
     </div>
