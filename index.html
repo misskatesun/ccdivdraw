@@ -19,7 +19,6 @@
             --card-bg: #ffffff;
             --primary-color: #8b0000;
             --border-color: #ccc;
-            /* 金色漸層與邊框更新為 #D4B886 調性 */
             --gold-gradient: linear-gradient(135deg, #f5e8cf 0%, #D4B886 50%, #9e7f4c 100%);
             --gold-border: #8f723e;
             
@@ -141,7 +140,7 @@
             border: 1px solid #e2cbb8;
             padding: 10px 15px;
             border-radius: 8px;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -152,6 +151,15 @@
         .draw-status-bar .latest-piece {
             color: #5a3e1b;
             font-size: 15px;
+        }
+
+        /* 獨立出來的滑動提示文字 */
+        .scroll-hint-text {
+            text-align: center;
+            font-size: 14px;
+            color: #7f613c;
+            font-weight: normal;
+            margin-bottom: 12px;
         }
 
         .pool-container {
@@ -204,23 +212,11 @@
             color: white;
         }
 
-        /* 莫蘭迪綠色（下載命盤圖片） */
-        button.btn-png {
-            background-color: var(--morandi-green);
-        }
-        button.btn-png:hover {
-            background-color: var(--morandi-green-hover);
-            transform: translateY(-1px);
-        }
+        button.btn-png { background-color: var(--morandi-green); }
+        button.btn-png:hover { background-color: var(--morandi-green-hover); transform: translateY(-1px); }
 
-        /* 莫蘭迪藍色（付費個案傳送命盤） */
-        button.btn-email {
-            background-color: var(--morandi-blue);
-        }
-        button.btn-email:hover {
-            background-color: var(--morandi-blue-hover);
-            transform: translateY(-1px);
-        }
+        button.btn-email { background-color: var(--morandi-blue); }
+        button.btn-email:hover { background-color: var(--morandi-blue-hover); transform: translateY(-1px); }
 
         button:disabled {
             background-color: #ccc !important;
@@ -238,7 +234,6 @@
             max-width: 90%;
         }
 
-        /* 訂購個案服務區塊 */
         .order-service-block {
             margin-top: 20px;
             display: flex;
@@ -455,7 +450,6 @@
             box-sizing: border-box;
         }
 
-        /* 懸浮於畫面右側中央的 ✖ 關閉按鈕 */
         .modal-close-fixed-x {
             position: fixed;
             right: 20px;
@@ -618,6 +612,9 @@
         <span class="latest-piece" id="latest-piece-info">點選金棋開始抽盤</span>
     </div>
 
+    <!-- 獨立顯示於「抽棋進度」與 32 支棋子中間的提示文字 -->
+    <div class="scroll-hint-text">（可滑動至下方看抽取結果）</div>
+
     <!-- 待抽區：32張蓋著的金棋 -->
     <div class="pool-container" id="pool-area"></div>
 
@@ -644,7 +641,8 @@
     <div id="chart-area">
         <div class="user-info-display">
             <div class="info-item">姓名：<span id="disp-name">-</span></div>
-            <div class="info-item">信箱：<span id="disp-email">-</span></div>
+            <!-- 信箱區塊加上 ID，若未填寫會自動隱藏該欄位 -->
+            <div class="info-item" id="disp-email-wrapper">信箱：<span id="disp-email">-</span></div>
             <div class="info-item">性別：<span id="disp-gender">-</span></div>
             <div class="info-item">國曆生日：<span id="disp-solar">-</span></div>
             <div class="info-item">農曆生日：<span id="disp-lunar">-</span></div>
@@ -701,7 +699,7 @@
     </div>
 </div>
 
-<!-- 彈出圖片儲存視窗 Image Modal (含畫面右側中央懸浮 ✖ 按鈕) -->
+<!-- 彈出圖片儲存視窗 Image Modal -->
 <div id="image-modal" class="modal-overlay" onclick="closeImageModal(event)">
     <div class="modal-close-fixed-x" onclick="closeImageModalDirect()" title="關閉視窗">&times;</div>
     <div class="modal-content" style="max-width: 90%;" onclick="event.stopPropagation()">
@@ -714,14 +712,10 @@
 </div>
 
 <script>
-    // --------------------------------------------------
-    // EmailJS 專屬設定
-    // --------------------------------------------------
     const EMAILJS_PUBLIC_KEY = "pbW57ejv97hBE4rJR";
     const EMAILJS_SERVICE_ID = "service_bjgwhlc";
     const EMAILJS_TEMPLATE_ID = "template_sj8bti7";
 
-    // 初始化 EmailJS SDK
     (function(){
         emailjs.init(EMAILJS_PUBLIC_KEY);
     })();
@@ -874,7 +868,6 @@
         document.getElementById('custom-alert-modal').style.display = 'none';
     }
 
-    // 檢查必填欄位驗證
     function validateFormFields(checkEmail = false) {
         const missingFields = [];
 
@@ -936,9 +929,8 @@
 
         placePieceOnBoard(currentDrawOrder, pieceData);
 
-        // 更新進度條文字（依需求加上提示）
         document.getElementById('draw-count').innerText = currentDrawOrder;
-        document.getElementById('latest-piece-info').innerText = `最新抽取：[ ${pieceData.text} ]（可滑動至下方看抽取結果）`;
+        document.getElementById('latest-piece-info').innerText = `最新抽取：[ ${pieceData.text} ]`;
 
         currentDrawOrder++;
 
@@ -947,7 +939,6 @@
             document.getElementById('latest-piece-info').innerText = "✨ 抽取完成！命盤已生成";
             setButtonsDisabled(false);
 
-            // 抽滿 32 支自動平滑捲動至「若無法下載...」提示區塊的最頂端
             setTimeout(() => {
                 document.getElementById('target-notice-area').scrollIntoView({ behavior: 'smooth' });
             }, 300);
@@ -964,12 +955,23 @@
         slotElem.appendChild(pieceElem);
     }
 
+    /* 同步卦主資訊顯示：未填寫 Email 時直接隱藏該行 */
     function syncUserInfoDisplay() {
         const genderElem = document.querySelector('input[name="gender"]:checked');
         const childrenElem = document.querySelector('input[name="has-children"]:checked');
+        const emailVal = document.getElementById('email').value.trim();
+        const emailWrapper = document.getElementById('disp-email-wrapper');
 
         document.getElementById('disp-name').innerText = document.getElementById('name').value.trim() || '未填寫';
-        document.getElementById('disp-email').innerText = document.getElementById('email').value.trim() || '未填寫';
+        
+        // 若信箱未填寫，完全隱藏信箱列
+        if (emailVal) {
+            emailWrapper.style.display = 'block';
+            document.getElementById('disp-email').innerText = emailVal;
+        } else {
+            emailWrapper.style.display = 'none';
+        }
+
         document.getElementById('disp-gender').innerText = genderElem ? genderElem.value : '未選擇';
         document.getElementById('disp-solar').innerText = document.getElementById('solar-date').value || '未選擇';
         document.getElementById('disp-lunar').innerText = document.getElementById('lunar-date-display').value || '未換算';
