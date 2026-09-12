@@ -10,6 +10,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- 引入農曆轉換庫 lunar-javascript -->
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.js"></script>
+    <!-- 引入 EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
     <style>
         :root {
@@ -171,7 +173,6 @@
             transform: translateY(-1px);
         }
 
-        /* Email 按鈕特色樣式 */
         button.btn-email {
             background-color: #2b5797;
         }
@@ -489,7 +490,7 @@
         <div class="btn-notice">若無法下載，請務必自行截圖</div>
         <div class="actions">
             <button onclick="generateImageModal()" class="btn-png" disabled>產生命盤圖片</button>
-            <button onclick="sendEmailToKate()" class="btn-email btn-action" disabled>📧 傳送命盤給凱特</button>
+            <button onclick="sendEmailToKateViaJS(this)" class="btn-email btn-action" disabled>📧 傳送命盤給凱特</button>
         </div>
         <div class="download-tip">📱 點擊「產生命盤圖片」後可長按儲存，或點擊「傳送命盤給凱特」直接寄出結果。</div>
     </div>
@@ -514,7 +515,7 @@
         <div class="btn-notice">若無法下載，請務必自行截圖</div>
         <div class="actions">
             <button onclick="generateImageModal()" class="btn-png" disabled>產生命盤圖片</button>
-            <button onclick="sendEmailToKate()" class="btn-email btn-action" disabled>📧 傳送命盤給凱特</button>
+            <button onclick="sendEmailToKateViaJS(this)" class="btn-email btn-action" disabled>📧 傳送命盤給凱特</button>
         </div>
         <div class="download-tip">📱 點擊「產生命盤圖片」後可長按儲存，或點擊「傳送命盤給凱特」直接寄出結果。</div>
     </div>
@@ -548,6 +549,18 @@
 </div>
 
 <script>
+    // --------------------------------------------------
+    // 已自動填入您的 EmailJS 專屬 Key
+    // --------------------------------------------------
+    const EMAILJS_PUBLIC_KEY = "pbW57ejv97hBE4rJR";
+    const EMAILJS_SERVICE_ID = "service_bjgwhlc";
+    const EMAILJS_TEMPLATE_ID = "template_sj8bti7";
+
+    // 初始化 EmailJS SDK
+    (function(){
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+    })();
+
     const CHESS_DECK = [
         { text: '帥', color: 'red' },
         { text: '仕', color: 'red' }, { text: '仕', color: 'red' },
@@ -589,7 +602,6 @@
     let poolDeck = [];
     let currentDrawOrder = 1;
     let firstPieceData = null;
-    let boardResults = {}; // 紀錄 1~33 位置的牌面資料
 
     window.onload = function() {
         updateLunarDate();
@@ -631,7 +643,6 @@
 
         currentDrawOrder = 1;
         firstPieceData = null;
-        boardResults = {};
 
         syncUserInfoDisplay();
         renderPoolArea();
@@ -692,13 +703,11 @@
         }
 
         placePieceOnBoard(currentDrawOrder, pieceData);
-        boardResults[currentDrawOrder] = pieceData.text;
 
         currentDrawOrder++;
 
         if (currentDrawOrder === 33) {
             placePieceOnBoard(33, firstPieceData);
-            boardResults[33] = firstPieceData.text;
             setButtonsDisabled(false);
         }
     }
@@ -738,46 +747,41 @@
         });
     }
 
-    // 點擊「傳送命盤給凱特」一鍵觸發寄信
-    function sendEmailToKate() {
-        const name = document.getElementById('disp-name').innerText;
-        const gender = document.getElementById('disp-gender').innerText;
-        const solar = document.getElementById('disp-solar').innerText;
-        const lunar = document.getElementById('disp-lunar').innerText;
-        const marital = document.getElementById('disp-marital').innerText;
-        const children = document.getElementById('disp-children').innerText;
-        const today = document.getElementById('disp-today').innerText;
+    // 透過 EmailJS 背景自動傳送命盤與截圖給凱特
+    function sendEmailToKateViaJS(btnElem) {
+        const originalText = btnElem.innerText;
+        btnElem.innerText = "⏳ 傳送中...";
+        setButtonsDisabled(true);
 
-        let resultListStr = "";
-        for (let i = 1; i <= 33; i++) {
-            resultListStr += `【位置 ${i}】：${boardResults[i] || '無'}\n`;
-        }
+        const target = document.getElementById('chart-area');
 
-        const emailRecipient = "kate@katesuncourse.com";
-        const emailSubject = `【象棋卜卦命盤結果】卦主：${name} (${today})`;
-        
-        const emailBody = 
-`凱特老師您好：
+        // 將命盤繪製成 Base64 圖片
+        html2canvas(target, { scale: 2, useCORS: true }).then(canvas => {
+            const imgBase64 = canvas.toDataURL('image/png');
 
-我已在網站上完成象棋卜卦抽牌，以下是我的命盤結果：
+            const templateParams = {
+                user_name: document.getElementById('disp-name').innerText,
+                user_gender: document.getElementById('disp-gender').innerText,
+                solar_date: document.getElementById('disp-solar').innerText,
+                lunar_date: document.getElementById('disp-lunar').innerText,
+                marital_status: document.getElementById('disp-marital').innerText,
+                has_children: document.getElementById('disp-children').innerText,
+                draw_date: document.getElementById('disp-today').innerText,
+                image_url: imgBase64
+            };
 
-=== 卦主基本資料 ===
-姓名：${name}
-性別：${gender}
-國曆生日：${solar}
-農曆生日：${lunar}
-婚姻狀態：${marital}
-有無子女：${children}
-抽取日期：${today}
-
-=== 命盤牌陣結果（1~33） ===
-${resultListStr}
-
-（已附上命盤資料，請老師參閱）`;
-
-        // 建立 mailto 連結並觸發發送
-        const mailtoUrl = `mailto:${emailRecipient}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-        window.location.href = mailtoUrl;
+            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+                .then(function(response) {
+                    alert('🎉 命盤結果已成功傳送給凱特老師！');
+                    btnElem.innerText = originalText;
+                    setButtonsDisabled(false);
+                }, function(error) {
+                    alert('寄送失敗，請直接截圖畫面提供給凱特老師。');
+                    console.error('EmailJS Error:', error);
+                    btnElem.innerText = originalText;
+                    setButtonsDisabled(false);
+                });
+        });
     }
 
     function closeModal(event) {
