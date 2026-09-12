@@ -21,6 +21,8 @@
             --border-color: #ccc;
             --gold-gradient: linear-gradient(135deg, #ffe066 0%, #d4af37 50%, #aa7c11 100%);
             --gold-border: #8a640f;
+            --green-btn-color: #2e7d32;
+            --green-btn-hover: #1b5e20;
         }
 
         body {
@@ -173,6 +175,14 @@
             transform: translateY(-1px);
         }
 
+        /* 綠色「產生命盤圖片」按鈕 */
+        button.btn-png {
+            background-color: var(--green-btn-color);
+        }
+        button.btn-png:hover {
+            background-color: var(--green-btn-hover);
+        }
+
         button.btn-email {
             background-color: #2b5797;
         }
@@ -181,18 +191,18 @@
         }
 
         button:disabled {
-            background-color: #ccc;
+            background-color: #ccc !important;
             cursor: not-allowed;
             box-shadow: none;
             transform: none;
         }
 
         .download-tip {
-            font-size: 14px;
-            color: #666;
+            font-size: 15px;
+            color: #555;
             margin-top: 10px;
             text-align: center;
-            line-height: 1.5;
+            line-height: 1.6;
             max-width: 90%;
         }
 
@@ -445,14 +455,14 @@
         <div class="form-group">
             <label>性別</label>
             <div class="radio-group">
-                <label><input type="radio" name="gender" value="女" checked onchange="syncUserInfoDisplay()"> 女</label>
+                <label><input type="radio" name="gender" value="女" onchange="syncUserInfoDisplay()"> 女</label>
                 <label><input type="radio" name="gender" value="男" onchange="syncUserInfoDisplay()"> 男</label>
             </div>
         </div>
 
         <div class="form-group">
             <label for="solar-date">國曆出生年月日</label>
-            <input type="date" id="solar-date" value="1990-01-01" onchange="updateLunarDate()">
+            <input type="date" id="solar-date" value="" placeholder="1990-01-01" onfocus="handleDateFocus(this)" onchange="updateLunarDate()">
         </div>
 
         <div class="form-group">
@@ -461,8 +471,9 @@
         </div>
 
         <div class="form-group">
-            <label>婚姻狀態</label>
+            <label for="marital-status">婚姻狀態</label>
             <select id="marital-status" onchange="syncUserInfoDisplay()">
+                <option value="">請選擇...</option>
                 <option value="未婚">未婚</option>
                 <option value="已婚">已婚</option>
                 <option value="離異">離異</option>
@@ -474,7 +485,7 @@
             <label>是否有子女</label>
             <div class="radio-group">
                 <label><input type="radio" name="has-children" value="是" onchange="syncUserInfoDisplay()"> 是</label>
-                <label><input type="radio" name="has-children" value="否" checked onchange="syncUserInfoDisplay()"> 否</label>
+                <label><input type="radio" name="has-children" value="否" onchange="syncUserInfoDisplay()"> 否</label>
             </div>
         </div>
     </div>
@@ -494,10 +505,13 @@
     <div class="action-wrapper">
         <div class="btn-notice">若無法下載，請務必自行截圖</div>
         <div class="actions">
-            <button onclick="generateImageModal()" class="btn-png" disabled>產生命盤圖片</button>
+            <button onclick="generateImageModal()" class="btn-png" disabled>🖼️ 產生命盤圖片</button>
             <button onclick="sendEmailToKateViaJS(this)" class="btn-email btn-action" disabled>📧 傳送命盤給凱特</button>
         </div>
-        <div class="download-tip">📱 點擊「產生命盤圖片」後可長按儲存，或點擊「傳送命盤給凱特」直接寄出結果。</div>
+        <div class="download-tip">
+            📱 點擊「產生命盤圖片」後可長按儲存<br>
+            📧 個案請點擊「傳送命盤給凱特」直接寄出結果
+        </div>
     </div>
 
     <!-- 命盤可視化輸出區域 -->
@@ -520,10 +534,13 @@
     <div class="action-wrapper" style="margin-top: 30px;">
         <div class="btn-notice">若無法下載，請務必自行截圖</div>
         <div class="actions">
-            <button onclick="generateImageModal()" class="btn-png" disabled>產生命盤圖片</button>
+            <button onclick="generateImageModal()" class="btn-png" disabled>🖼️ 產生命盤圖片</button>
             <button onclick="sendEmailToKateViaJS(this)" class="btn-email btn-action" disabled>📧 傳送命盤給凱特</button>
         </div>
-        <div class="download-tip">📱 點擊「產生命盤圖片」後可長按儲存，或點擊「傳送命盤給凱特」直接寄出結果。</div>
+        <div class="download-tip">
+            📱 點擊「產生命盤圖片」後可長按儲存<br>
+            📧 個案請點擊「傳送命盤給凱特」直接寄出結果
+        </div>
     </div>
 
     <!-- 頁尾社群媒體連結 -->
@@ -610,7 +627,6 @@
     let firstPieceData = null;
 
     window.onload = function() {
-        updateLunarDate();
         startNewDivination();
     };
 
@@ -622,9 +638,21 @@
         return `${year}-${month}-${day}`;
     }
 
+    // 點擊日曆時，預設定位在 1990-01-01 方便選取
+    function handleDateFocus(inputElem) {
+        if (!inputElem.value) {
+            inputElem.value = "1990-01-01";
+            updateLunarDate();
+        }
+    }
+
     function updateLunarDate() {
         const solarVal = document.getElementById('solar-date').value;
-        if (!solarVal) return;
+        if (!solarVal) {
+            document.getElementById('lunar-date-display').value = "";
+            syncUserInfoDisplay();
+            return;
+        }
         const [year, month, day] = solarVal.split('-').map(Number);
         
         try {
@@ -693,8 +721,46 @@
         });
     }
 
+    // 檢查必填欄位驗證
+    function validateFormFields() {
+        const genderElem = document.querySelector('input[name="gender"]:checked');
+        if (!genderElem) {
+            alert("記得選擇「性別」！");
+            return false;
+        }
+
+        const solarDate = document.getElementById('solar-date').value;
+        if (!solarDate) {
+            alert("記得選擇「國曆出生年月日」！");
+            document.getElementById('solar-date').focus();
+            return false;
+        }
+
+        const maritalStatus = document.getElementById('marital-status').value;
+        if (!maritalStatus) {
+            alert("記得選擇「婚姻狀態」！");
+            document.getElementById('marital-status').focus();
+            return false;
+        }
+
+        const hasChildrenElem = document.querySelector('input[name="has-children"]:checked');
+        if (!hasChildrenElem) {
+            alert("記得選擇「是否有子女」！");
+            return false;
+        }
+
+        return true;
+    }
+
     function selectPieceFromPool(poolIndex) {
         if (currentDrawOrder > 32) return;
+
+        // 如果是第一抽，先檢查個人資料是否都有選擇
+        if (currentDrawOrder === 1) {
+            if (!validateFormFields()) {
+                return;
+            }
+        }
 
         syncUserInfoDisplay();
 
@@ -729,13 +795,16 @@
     }
 
     function syncUserInfoDisplay() {
+        const genderElem = document.querySelector('input[name="gender"]:checked');
+        const childrenElem = document.querySelector('input[name="has-children"]:checked');
+
         document.getElementById('disp-name').innerText = document.getElementById('name').value.trim() || '未填寫';
         document.getElementById('disp-email').innerText = document.getElementById('email').value.trim() || '未填寫';
-        document.getElementById('disp-gender').innerText = document.querySelector('input[name="gender"]:checked').value;
-        document.getElementById('disp-solar').innerText = document.getElementById('solar-date').value || '未填寫';
+        document.getElementById('disp-gender').innerText = genderElem ? genderElem.value : '未選擇';
+        document.getElementById('disp-solar').innerText = document.getElementById('solar-date').value || '未選擇';
         document.getElementById('disp-lunar').innerText = document.getElementById('lunar-date-display').value || '未換算';
-        document.getElementById('disp-marital').innerText = document.getElementById('marital-status').value;
-        document.getElementById('disp-children').innerText = document.querySelector('input[name="has-children"]:checked').value;
+        document.getElementById('disp-marital').innerText = document.getElementById('marital-status').value || '未選擇';
+        document.getElementById('disp-children').innerText = childrenElem ? childrenElem.value : '未選擇';
         document.getElementById('disp-today').innerText = getTodayFormatted();
     }
 
@@ -756,6 +825,11 @@
 
     // 透過 EmailJS 傳送純文字 HTML 陣列表格與 Email
     function sendEmailToKateViaJS(btnElem) {
+        // 先再次驗證必填項與 Email
+        if (!validateFormFields()) {
+            return;
+        }
+
         const userEmail = document.getElementById('email').value.trim();
         if (!userEmail) {
             alert('請先填寫您的「電子信箱 (E-mail)」，以便凱特回覆解讀結果給您！');
