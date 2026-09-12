@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>凱特的好命學院 - 象棋卜卦命盤系統</title>
-    <!-- 引入 Font Awesome 圖示庫 (社群媒體 Logo) -->
+    <!-- 引入 Font Awesome 圖示庫 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- 引入 html2canvas 用於圖片導出 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -17,7 +17,6 @@
             --card-bg: #ffffff;
             --primary-color: #8b0000;
             --border-color: #ccc;
-            /* 金色棋子漸層效果 (待抽區) */
             --gold-gradient: linear-gradient(135deg, #ffe066 0%, #d4af37 50%, #aa7c11 100%);
             --gold-border: #8a640f;
         }
@@ -103,7 +102,6 @@
             cursor: pointer;
         }
 
-        /* 引導提示文字區塊 */
         .guide-text {
             text-align: center;
             font-size: 18px;
@@ -117,7 +115,6 @@
             line-height: 1.8;
         }
 
-        /* 頂部可點選的抽牌區 */
         .pool-container {
             display: flex;
             flex-wrap: wrap;
@@ -131,7 +128,6 @@
             min-height: 130px;
         }
 
-        /* 按鈕上方提醒文字 */
         .btn-notice {
             text-align: center;
             color: #8b0000;
@@ -140,7 +136,6 @@
             margin-bottom: 8px;
         }
 
-        /* 操作按鈕區塊與提示說明 */
         .action-wrapper {
             display: flex;
             flex-direction: column;
@@ -151,7 +146,7 @@
         .actions {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
             flex-wrap: wrap;
         }
 
@@ -159,18 +154,29 @@
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 12px 32px;
-            font-size: 18px;
+            padding: 12px 24px;
+            font-size: 17px;
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
             box-shadow: 0 3px 6px rgba(0,0,0,0.15);
             transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
         button:hover {
             background-color: #a00000;
             transform: translateY(-1px);
+        }
+
+        /* Email 按鈕特色樣式 */
+        button.btn-email {
+            background-color: #2b5797;
+        }
+        button.btn-email:hover {
+            background-color: #1e3d6b;
         }
 
         button:disabled {
@@ -189,7 +195,6 @@
             max-width: 90%;
         }
 
-        /* 命盤列印區域 */
         #chart-area {
             background: #fffdfa;
             border: 2px solid #8b0000;
@@ -218,7 +223,6 @@
             color: #000;
         }
 
-        /* 棋盤佈局 */
         .board-container {
             display: flex;
             flex-direction: column;
@@ -235,7 +239,6 @@
             width: 100%;
         }
 
-        /* 象棋槽 */
         .chess-slot {
             width: 68px;
             height: 68px;
@@ -248,7 +251,6 @@
             border: 2px dashed #c2a878;
         }
 
-        /* 通用棋子樣式 */
         .chess-piece {
             width: 62px;
             height: 62px;
@@ -264,7 +266,6 @@
             transition: transform 0.15s, opacity 0.2s;
         }
 
-        /* 上方待抽區：金色棋子 */
         .chess-piece.gold {
             background: var(--gold-gradient);
             border: 2px solid var(--gold-border);
@@ -275,7 +276,6 @@
             transform: scale(1.1);
         }
 
-        /* 下方命盤：白底棋子 */
         .chess-piece.board-white {
             background: #ffffff;
             border: 3px solid #666;
@@ -292,18 +292,12 @@
             border-color: #333333;
         }
 
-        /* 隱藏數字 1-33 */
-        .slot-number {
-            display: none;
-        }
-
         .placeholder-slot {
             width: 68px;
             height: 68px;
             visibility: hidden;
         }
 
-        /* 頁尾社群連結區域 (RWD 自適應防裁切) */
         .social-footer {
             margin-top: 40px;
             padding-top: 20px;
@@ -326,7 +320,7 @@
             display: flex;
             gap: 15px;
             justify-content: center;
-            flex-wrap: wrap; /* 自動換行避免被手機邊界裁切 */
+            flex-wrap: wrap;
             width: 100%;
         }
 
@@ -344,45 +338,88 @@
             box-sizing: border-box;
         }
 
-        .social-btn.fb {
-            color: #1877f2;
-            background: #e7f3ff;
-        }
-        .social-btn.ig {
-            color: #e4405f;
-            background: #fde8ed;
-        }
-        .social-btn.yt {
-            color: #ff0000;
-            background: #ffe6e6;
-        }
+        .social-btn.fb { color: #1877f2; background: #e7f3ff; }
+        .social-btn.ig { color: #e4405f; background: #fde8ed; }
+        .social-btn.yt { color: #ff0000; background: #ffe6e6; }
 
         .social-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
-        /* 手機版微調 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 90%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+            overflow-y: auto;
+        }
+
+        .modal-tip {
+            font-size: 18px;
+            font-weight: bold;
+            color: #8b0000;
+            margin-bottom: 12px;
+            text-align: center;
+            background: #fff3cd;
+            padding: 10px 16px;
+            border-radius: 6px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .modal-img-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .modal-img-wrapper img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        }
+
+        .close-btn {
+            margin-top: 15px;
+            background-color: #666;
+            color: white;
+            padding: 8px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .close-btn:hover { background-color: #444; }
+
         @media (max-width: 600px) {
-            .social-links {
-                gap: 10px;
-            }
-            .social-btn {
-                padding: 8px 12px;
-                font-size: 14px;
-            }
-            .board-row {
-                gap: 8px;
-            }
-            .chess-slot, .placeholder-slot {
-                width: 54px;
-                height: 54px;
-            }
-            .chess-piece {
-                width: 48px;
-                height: 48px;
-                font-size: 20px;
-            }
+            .social-links { gap: 10px; }
+            .social-btn { padding: 8px 12px; font-size: 14px; }
+            .board-row { gap: 8px; }
+            .chess-slot, .placeholder-slot { width: 54px; height: 54px; }
+            .chess-piece { width: 48px; height: 48px; font-size: 20px; }
         }
     </style>
 </head>
@@ -445,20 +482,19 @@
     </div>
 
     <!-- 待抽區：32張蓋著的金棋 -->
-    <div class="pool-container" id="pool-area">
-        <!-- 由 JavaScript 動態產生 -->
-    </div>
+    <div class="pool-container" id="pool-area"></div>
 
-    <!-- 頂部下載按鈕組 -->
+    <!-- 頂部按鈕組 -->
     <div class="action-wrapper">
         <div class="btn-notice">若無法下載，請務必自行截圖</div>
         <div class="actions">
-            <button onclick="downloadPNG()" class="btn-png" disabled>下載 PNG 圖片</button>
+            <button onclick="generateImageModal()" class="btn-png" disabled>產生命盤圖片</button>
+            <button onclick="sendEmailToKate()" class="btn-email btn-action" disabled>📧 傳送命盤給凱特</button>
         </div>
-        <div class="download-tip">📱 手機下載後若找不到圖片，請至手機「檔案/下載」資料夾查看，或直接手動截圖保存。</div>
+        <div class="download-tip">📱 點擊「產生命盤圖片」後可長按儲存，或點擊「傳送命盤給凱特」直接寄出結果。</div>
     </div>
 
-    <!-- 命盤可視化輸出區域（將導出的完整畫面） -->
+    <!-- 命盤可視化輸出區域 -->
     <div id="chart-area">
         <div class="user-info-display">
             <div class="info-item">姓名：<span id="disp-name">-</span></div>
@@ -470,19 +506,17 @@
             <div class="info-item">抽取日期：<span id="disp-today">-</span></div>
         </div>
 
-        <!-- 33個位置的命盤陣型 -->
-        <div class="board-container" id="board">
-            <!-- 由 JavaScript 動態產生 -->
-        </div>
+        <div class="board-container" id="board"></div>
     </div>
 
-    <!-- 命盤底部的下載按鈕組 -->
+    <!-- 命盤底部的按鈕組 -->
     <div class="action-wrapper" style="margin-top: 30px;">
         <div class="btn-notice">若無法下載，請務必自行截圖</div>
         <div class="actions">
-            <button onclick="downloadPNG()" class="btn-png" disabled>下載 PNG 圖片</button>
+            <button onclick="generateImageModal()" class="btn-png" disabled>產生命盤圖片</button>
+            <button onclick="sendEmailToKate()" class="btn-email btn-action" disabled>📧 傳送命盤給凱特</button>
         </div>
-        <div class="download-tip">📱 手機下載後若找不到圖片，請至手機「檔案/下載」資料夾查看，或直接手動截圖保存。</div>
+        <div class="download-tip">📱 點擊「產生命盤圖片」後可長按儲存，或點擊「傳送命盤給凱特」直接寄出結果。</div>
     </div>
 
     <!-- 頁尾社群媒體連結 -->
@@ -502,8 +536,18 @@
     </div>
 </div>
 
+<!-- 彈出圖片儲存視窗 Modal -->
+<div id="image-modal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-tip">📱 請長按下方圖片即可儲存至手機相簿</div>
+        <div class="modal-img-wrapper">
+            <img id="generated-image" src="" alt="象棋卜卦命盤">
+        </div>
+        <button class="close-btn" onclick="closeModalDirect()">關閉視窗</button>
+    </div>
+</div>
+
 <script>
-    // 32支象棋標準牌組
     const CHESS_DECK = [
         { text: '帥', color: 'red' },
         { text: '仕', color: 'red' }, { text: '仕', color: 'red' },
@@ -522,7 +566,6 @@
         { text: '卒', color: 'black' }, { text: '卒', color: 'black' }, { text: '卒', color: 'black' }, { text: '卒', color: 'black' }, { text: '卒', color: 'black' }
     ];
 
-    // 命盤陣型結構 (1~33 位置)
     const BOARD_STRUCTURE = [
         [null, 4, null],
         [2, 1, 3],
@@ -540,19 +583,19 @@
         [27, 26, 28],
         [null, 29, null],
         [31, 30, 32],
-        [null, 33, null] // 第33個位置
+        [null, 33, null]
     ];
 
-    let poolDeck = [];        // 洗好的 32 支牌數據
-    let currentDrawOrder = 1; // 當前發牌到命盤的第幾順位 (1~32)
-    let firstPieceData = null; // 紀錄第1支發出的牌（供第33位置自動複製使用）
+    let poolDeck = [];
+    let currentDrawOrder = 1;
+    let firstPieceData = null;
+    let boardResults = {}; // 紀錄 1~33 位置的牌面資料
 
     window.onload = function() {
         updateLunarDate();
         startNewDivination();
     };
 
-    // 取得今日 YYYY-MM-DD 格式日期
     function getTodayFormatted() {
         const today = new Date();
         const year = today.getFullYear();
@@ -561,7 +604,6 @@
         return `${year}-${month}-${day}`;
     }
 
-    // 自動換算農曆（格式：民國年-月-日，如：78-12-05）
     function updateLunarDate() {
         const solarVal = document.getElementById('solar-date').value;
         if (!solarVal) return;
@@ -570,21 +612,16 @@
         try {
             const solar = Solar.fromYmd(year, month, day);
             const lunar = solar.getLunar();
-            
-            // 算民國年 (西元年 - 1911)
             const rocYear = lunar.getYear() - 1911;
             const lunarMonth = String(Math.abs(lunar.getMonth())).padStart(2, '0');
             const lunarDay = String(lunar.getDay()).padStart(2, '0');
-
-            const formattedLunar = `${rocYear}-${lunarMonth}-${lunarDay}`;
-            document.getElementById('lunar-date-display').value = formattedLunar;
+            document.getElementById('lunar-date-display').value = `${rocYear}-${lunarMonth}-${lunarDay}`;
         } catch (e) {
             document.getElementById('lunar-date-display').value = "日期錯誤";
         }
         syncUserInfoDisplay();
     }
 
-    // 重設 / 洗牌開局
     function startNewDivination() {
         poolDeck = [...CHESS_DECK];
         for (let i = poolDeck.length - 1; i > 0; i--) {
@@ -594,6 +631,7 @@
 
         currentDrawOrder = 1;
         firstPieceData = null;
+        boardResults = {};
 
         syncUserInfoDisplay();
         renderPoolArea();
@@ -602,11 +640,9 @@
         setButtonsDisabled(true);
     }
 
-    // 渲染頂部可選點的 32 支金棋區
     function renderPoolArea() {
         const poolArea = document.getElementById('pool-area');
         poolArea.innerHTML = '';
-
         poolDeck.forEach((piece, index) => {
             const pieceElem = document.createElement('div');
             pieceElem.className = 'chess-piece gold';
@@ -617,15 +653,12 @@
         });
     }
 
-    // 渲染命盤區
     function renderBoardArea() {
         const boardElem = document.getElementById('board');
         boardElem.innerHTML = '';
-
         BOARD_STRUCTURE.forEach(row => {
             const rowElem = document.createElement('div');
             rowElem.className = 'board-row';
-
             row.forEach(slotNum => {
                 if (slotNum === null) {
                     const placeholder = document.createElement('div');
@@ -635,17 +668,14 @@
                     const slotElem = document.createElement('div');
                     slotElem.className = 'chess-slot';
                     slotElem.id = `board-slot-${slotNum}`;
-
                     boardElem.appendChild(slotElem);
                     rowElem.appendChild(slotElem);
                 }
             });
-
             boardElem.appendChild(rowElem);
         });
     }
 
-    // 點擊頂部待抽區的棋子
     function selectPieceFromPool(poolIndex) {
         if (currentDrawOrder > 32) return;
 
@@ -654,31 +684,25 @@
         const poolPieceElem = document.getElementById(`pool-piece-${poolIndex}`);
         if (!poolPieceElem || poolPieceElem.style.visibility === 'hidden') return;
 
-        // 隱藏頂部該棋子（代表已抽走）
         poolPieceElem.style.visibility = 'hidden';
-
         const pieceData = poolDeck[poolIndex];
 
-        // 紀錄第 1 支牌
         if (currentDrawOrder === 1) {
             firstPieceData = pieceData;
         }
 
-        // 將棋子以「白底」放入命盤區
         placePieceOnBoard(currentDrawOrder, pieceData);
+        boardResults[currentDrawOrder] = pieceData.text;
 
         currentDrawOrder++;
 
-        // 當抽滿 32 支時，自動產生第 33 支（同第 1 支）
         if (currentDrawOrder === 33) {
             placePieceOnBoard(33, firstPieceData);
-
-            // 解鎖下載按鈕
+            boardResults[33] = firstPieceData.text;
             setButtonsDisabled(false);
         }
     }
 
-    // 在命盤位置上放置白底紅/黑字棋子
     function placePieceOnBoard(slotNum, pieceData) {
         const slotElem = document.getElementById(`board-slot-${slotNum}`);
         if (!slotElem) return;
@@ -686,12 +710,9 @@
         const pieceElem = document.createElement('div');
         pieceElem.className = `chess-piece board-white ${pieceData.color}`;
         pieceElem.innerText = pieceData.text;
-
-        // 插入到 slot 中
         slotElem.appendChild(pieceElem);
     }
 
-    // 同步顯示卦主資訊及今日日期
     function syncUserInfoDisplay() {
         document.getElementById('disp-name').innerText = document.getElementById('name').value.trim() || '未填寫';
         document.getElementById('disp-gender').innerText = document.querySelector('input[name="gender"]:checked').value;
@@ -702,25 +723,71 @@
         document.getElementById('disp-today').innerText = getTodayFormatted();
     }
 
-    // 控制下載按鈕狀態
     function setButtonsDisabled(disabled) {
-        document.querySelectorAll('.btn-png').forEach(btn => {
+        document.querySelectorAll('.btn-png, .btn-action').forEach(btn => {
             btn.disabled = disabled;
         });
     }
 
-    // 高清下載 PNG 圖片（檔名包含今日日期）
-    function downloadPNG() {
+    function generateImageModal() {
         const target = document.getElementById('chart-area');
-        const name = document.getElementById('name').value.trim() || '卦主';
-        const todayStr = getTodayFormatted();
-        
         html2canvas(target, { scale: 3, useCORS: true }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = `象棋卜卦命盤_${name}_${todayStr}.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
+            const imgUrl = canvas.toDataURL('image/png');
+            document.getElementById('generated-image').src = imgUrl;
+            document.getElementById('image-modal').style.display = 'flex';
         });
+    }
+
+    // 點擊「傳送命盤給凱特」一鍵觸發寄信
+    function sendEmailToKate() {
+        const name = document.getElementById('disp-name').innerText;
+        const gender = document.getElementById('disp-gender').innerText;
+        const solar = document.getElementById('disp-solar').innerText;
+        const lunar = document.getElementById('disp-lunar').innerText;
+        const marital = document.getElementById('disp-marital').innerText;
+        const children = document.getElementById('disp-children').innerText;
+        const today = document.getElementById('disp-today').innerText;
+
+        let resultListStr = "";
+        for (let i = 1; i <= 33; i++) {
+            resultListStr += `【位置 ${i}】：${boardResults[i] || '無'}\n`;
+        }
+
+        const emailRecipient = "kate@katesuncourse.com";
+        const emailSubject = `【象棋卜卦命盤結果】卦主：${name} (${today})`;
+        
+        const emailBody = 
+`凱特老師您好：
+
+我已在網站上完成象棋卜卦抽牌，以下是我的命盤結果：
+
+=== 卦主基本資料 ===
+姓名：${name}
+性別：${gender}
+國曆生日：${solar}
+農曆生日：${lunar}
+婚姻狀態：${marital}
+有無子女：${children}
+抽取日期：${today}
+
+=== 命盤牌陣結果（1~33） ===
+${resultListStr}
+
+（已附上命盤資料，請老師參閱）`;
+
+        // 建立 mailto 連結並觸發發送
+        const mailtoUrl = `mailto:${emailRecipient}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+        window.location.href = mailtoUrl;
+    }
+
+    function closeModal(event) {
+        if (event.target.id === 'image-modal') {
+            document.getElementById('image-modal').style.display = 'none';
+        }
+    }
+
+    function closeModalDirect() {
+        document.getElementById('image-modal').style.display = 'none';
     }
 </script>
 
