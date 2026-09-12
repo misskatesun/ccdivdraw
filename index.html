@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>凱特的好命學院 - 象棋卜卦命盤系統</title>
+    <!-- 引入 Font Awesome 圖示庫 (社群媒體 Logo) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 引入 html2canvas & jspdf 用於圖片與PDF導出 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- 引入農曆轉換庫 lunar-javascript -->
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #fcf9f2;
+            --card-bg: #ffffff;
+            --primary-color: #8b0000;
+            --border-color: #ccc;
+            /* 金色棋子漸層效果 (待抽區) */
+            --gold-gradient: linear-gradient(135deg, #ffe066 0%, #d4af37 50%, #aa7c11 100%);
+            --gold-border: #8a640f;
+        }
+
+        body {
+            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 950px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .header-title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: #5a3e1b;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-top: 5px;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+
+        /* 表單樣式 */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 18px;
+            margin-bottom: 25px;
+            background: #faf8f5;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #eeddcc;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .form-group input, .form-group select {
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            height: 40px;
+            font-size: 16px;
+        }
+
+        .radio-group label {
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        /* 引導提示文字區塊 */
+        .guide-text {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #4a2c00;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 18px;
+            border-radius: 8px;
+            margin: 20px 0 15px 0;
+            line-height: 1.8;
+        }
+
+        /* 頂部可點選的抽牌區 */
+        .pool-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            background: #fdfbf7;
+            border: 2px dashed #d4af37;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            min-height: 130px;
+        }
+
+        /* 按鈕上方提醒文字 */
+        .btn-notice {
+            text-align: center;
+            color: #8b0000;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        /* 操作按鈕組 */
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 10px 0 25px 0;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background-color: #a00000;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* 命盤列印區域 */
+        #chart-area {
+            background: #fffdfa;
+            border: 2px solid #8b0000;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 15px;
+            position: relative;
+        }
+
+        .user-info-display {
+            border-bottom: 2px dashed #8b0000;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            font-size: 18px; /* 放大文字 */
+            line-height: 1.6;
+        }
+
+        .info-item {
+            color: #444;
+        }
+        .info-item span {
+            font-weight: bold;
+            color: #000;
+        }
+
+        /* 棋盤佈局 */
+        .board-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin: 25px 0;
+        }
+
+        .board-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 24px;
+            width: 100%;
+        }
+
+        /* 象棋槽 */
+        .chess-slot {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background: #f4efe6;
+            border: 2px dashed #c2a878;
+        }
+
+        /* 通用棋子樣式 */
+        .chess-piece {
+            width: 62px;
+            height: 62px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 26px; /* 放大棋子文字 */
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            box-shadow: 2px 3px 6px rgba(0,0,0,0.2);
+            transition: transform 0.15s, opacity 0.2s;
+        }
+
+        /* 上方待抽區：金色棋子 */
+        .chess-piece.gold {
+            background: var(--gold-gradient);
+            border: 2px solid var(--gold-border);
+            color: transparent !important;
+        }
+
+        .chess-piece.gold:hover {
+            transform: scale(1.1);
+        }
+
+        /* 下方命盤：白底棋子 */
+        .chess-piece.board-white {
+            background: #ffffff;
+            border: 3px solid #666;
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .chess-piece.board-white.red {
+            color: #cc0000;
+            border-color: #cc0000;
+        }
+
+        .chess-piece.board-white.black {
+            color: #111111;
+            border-color: #333333;
+        }
+
+        /* 隱藏數字 1-33 */
+        .slot-number {
+            display: none;
+        }
+
+        .placeholder-slot {
+            width: 68px;
+            height: 68px;
+            visibility: hidden;
+        }
+
+        /* 頁尾社群連結區域 */
+        .social-footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .social-footer .footer-text {
+            font-size: 16px;
+            color: #666;
+            font-weight: bold;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 25px;
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.2s;
+        }
+
+        .social-btn.fb {
+            color: #1877f2;
+            background: #e7f3ff;
+        }
+        .social-btn.ig {
+            color: #e4405f;
+            background: #fde8ed;
+        }
+        .social-btn.yt {
+            color: #ff0000;
+            background: #ffe6e6;
+        }
+
+        .social-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-title">凱特的好命學院</div>
+    <h1>象棋卜卦命盤系統</h1>
+
+    <!-- 卦主資訊表單 -->
+    <div class="form-grid">
+        <div class="form-group">
+            <label for="name">卦主姓名</label>
+            <input type="text" id="name" placeholder="請輸入姓名" value="" oninput="syncUserInfoDisplay()">
+        </div>
+
+        <div class="form-group">
+            <label>性別</label>
+            <div class="radio-group">
+                <label><input type="radio" name="gender" value="女" checked onchange="syncUserInfoDisplay()"> 女</label>
+                <label><input type="radio" name="gender" value="男" onchange="syncUserInfoDisplay()"> 男</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="solar-date">國曆出生年月日</label>
+            <input type="date" id="solar-date" value="1990-01-01" onchange="updateLunarDate()">
+        </div>
+
+        <div class="form-group">
+            <label for="lunar-date-display">農曆生日（民國）</label>
+            <input type="text" id="lunar-date-display" readonly placeholder="自動換算" style="background: #eee;">
+        </div>
+
+        <div class="form-group">
+            <label>婚姻狀態</label>
+            <select id="marital-status" onchange="syncUserInfoDisplay()">
+                <option value="未婚">未婚</option>
+                <option value="已婚">已婚</option>
+                <option value="離異">離異</option>
+                <option value="鰥寡">鰥寡</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>是否有子女</label>
+            <div class="radio-group">
+                <label><input type="radio" name="has-children" value="是" onchange="syncUserInfoDisplay()"> 是</label>
+                <label><input type="radio" name="has-children" value="否" checked onchange="syncUserInfoDisplay()"> 否</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- 指導靈提示文字 -->
+    <div class="guide-text">
+        一事不二問，一生只能抽一次。<br>
+        請誠心默唸一次：<br>
+        「指導靈，請給我我的命盤」<br>
+        唸完即可開始抽棋子
+    </div>
+
+    <!-- 待抽區：32張蓋著的金棋 -->
+    <div class="pool-container" id="pool-area">
+        <!-- 由 JavaScript 動態產生 -->
+    </div>
+
+    <!-- 頂部下載按鈕組 -->
+    <div class="btn-notice">若無法下載，請務必自行截圖</div>
+    <div class="actions">
+        <button onclick="downloadPNG()" class="btn-png" disabled>下載 PNG 圖片</button>
+        <button onclick="downloadPDF()" class="btn-pdf" disabled>下載 PDF 檔案</button>
+    </div>
+
+    <!-- 命盤可視化輸出區域（將導出的完整畫面） -->
+    <div id="chart-area">
+        <div class="user-info-display">
+            <div class="info-item">姓名：<span id="disp-name">-</span></div>
+            <div class="info-item">性別：<span id="disp-gender">-</span></div>
+            <div class="info-item">國曆生日：<span id="disp-solar">-</span></div>
+            <div class="info-item">農曆生日：<span id="disp-lunar">-</span></div>
+            <div class="info-item">婚姻狀態：<span id="disp-marital">-</span></div>
+            <div class="info-item">有無子女：<span id="disp-children">-</span></div>
+            <div class="info-item">抽取日期：<span id="disp-today">-</span></div>
+        </div>
+
+        <!-- 33個位置的命盤陣型 -->
+        <div class="board-container" id="board">
+            <!-- 由 JavaScript 動態產生 -->
+        </div>
+    </div>
+
+    <!-- 命盤底部的下載按鈕組 -->
+    <div class="btn-notice" style="margin-top: 30px;">若無法下載，請務必自行截圖</div>
+    <div class="actions">
+        <button onclick="downloadPNG()" class="btn-png" disabled>下載 PNG 圖片</button>
+        <button onclick="downloadPDF()" class="btn-pdf" disabled>下載 PDF 檔案</button>
+    </div>
+
+    <!-- 頁尾社群媒體連結 -->
+    <div class="social-footer">
+        <div class="footer-text">關注 凱特的好命學院 社群媒體：</div>
+        <div class="social-links">
+            <a href="https://www.facebook.com/katesuncourse" target="_blank" class="social-btn fb">
+                <i class="fab fa-facebook"></i> Facebook
+            </a>
+            <a href="https://www.instagram.com/katesuncourse/" target="_blank" class="social-btn ig">
+                <i class="fab fa-instagram"></i> Instagram
+            </a>
+            <a href="https://www.youtube.com/@katesungoodlife" target="_blank" class="social-btn yt">
+                <i class="fab fa-youtube"></i> YouTube
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 32支象棋標準牌組
+    const CHESS_DECK = [
+        { text: '帥', color: 'red' },
+        { text: '仕', color: 'red' }, { text: '仕', color: 'red' },
+        { text: '相', color: 'red' }, { text: '相', color: 'red' },
+        { text: '俥', color: 'red' }, { text: '俥', color: 'red' },
+        { text: '傌', color: 'red' }, { text: '傌', color: 'red' },
+        { text: '炮', color: 'red' }, { text: '炮', color: 'red' },
+        { text: '兵', color: 'red' }, { text: '兵', color: 'red' }, { text: '兵', color: 'red' }, { text: '兵', color: 'red' }, { text: '兵', color: 'red' },
+        
+        { text: '將', color: 'black' },
+        { text: '士', color: 'black' }, { text: '士', color: 'black' },
+        { text: '象', color: 'black' }, { text: '象', color: 'black' },
+        { text: '車', color: 'black' }, { text: '車', color: 'black' },
+        { text: '馬', color: 'black' }, { text: '馬', color: 'black' },
+        { text: '包', color: 'black' }, { text: '包', color: 'black' },
+        { text: '卒', color: 'black' }, { text: '卒', color: 'black' }, { text: '卒', color: 'black' }, { text: '卒', color: 'black' }, { text: '卒', color: 'black' }
+    ];
+
+    // 命盤陣型結構 (依照圖片順序 1~33 位置)
+    const BOARD_STRUCTURE = [
+        [null, 4, null],
+        [2, 1, 3],
+        [null, 5, null],
+        [7, 6, 8],
+        [null, 9, null],
+        [11, 10, 12],
+        [null, 13, null],
+        [15, 14, 16],
+        [null, 17, null],
+        [19, 18, 20],
+        [null, 21, null],
+        [23, 22, 24],
+        [null, 25, null],
+        [27, 26, 28],
+        [null, 29, null],
+        [31, 30, 32],
+        [null, 33, null] // 第33個位置
+    ];
+
+    let poolDeck = [];        // 洗好的 32 支牌數據
+    let currentDrawOrder = 1; // 當前發牌到命盤的第幾順位 (1~32)
+    let firstPieceData = null; // 紀錄第1支發出的牌（供第33位置自動複製使用）
+
+    window.onload = function() {
+        updateLunarDate();
+        startNewDivination();
+    };
+
+    // 取得今日 YYYY-MM-DD 格式日期
+    function getTodayFormatted() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    // 自動換算農曆（格式：民國年-月-日，如：78-12-05）
+    function updateLunarDate() {
+        const solarVal = document.getElementById('solar-date').value;
+        if (!solarVal) return;
+        const [year, month, day] = solarVal.split('-').map(Number);
+        
+        try {
+            const solar = Solar.fromYmd(year, month, day);
+            const lunar = solar.getLunar();
+            
+            // 算民國年 (西元年 - 1911)
+            const rocYear = lunar.getYear() - 1911;
+            const lunarMonth = String(Math.abs(lunar.getMonth())).padStart(2, '0');
+            const lunarDay = String(lunar.getDay()).padStart(2, '0');
+
+            const formattedLunar = `${rocYear}-${lunarMonth}-${lunarDay}`;
+            document.getElementById('lunar-date-display').value = formattedLunar;
+        } catch (e) {
+            document.getElementById('lunar-date-display').value = "日期錯誤";
+        }
+        syncUserInfoDisplay();
+    }
+
+    // 重設 / 洗牌開局
+    function startNewDivination() {
+        poolDeck = [...CHESS_DECK];
+        for (let i = poolDeck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [poolDeck[i], poolDeck[j]] = [poolDeck[j], poolDeck[i]];
+        }
+
+        currentDrawOrder = 1;
+        firstPieceData = null;
+
+        syncUserInfoDisplay();
+        renderPoolArea();
+        renderBoardArea();
+
+        setButtonsDisabled(true);
+    }
+
+    // 渲染頂部可選點的 32 支金棋區
+    function renderPoolArea() {
+        const poolArea = document.getElementById('pool-area');
+        poolArea.innerHTML = '';
+
+        poolDeck.forEach((piece, index) => {
+            const pieceElem = document.createElement('div');
+            pieceElem.className = 'chess-piece gold';
+            pieceElem.id = `pool-piece-${index}`;
+            pieceElem.innerText = piece.text;
+            pieceElem.onclick = () => selectPieceFromPool(index);
+            poolArea.appendChild(pieceElem);
+        });
+    }
+
+    // 渲染命盤區
+    function renderBoardArea() {
+        const boardElem = document.getElementById('board');
+        boardElem.innerHTML = '';
+
+        BOARD_STRUCTURE.forEach(row => {
+            const rowElem = document.createElement('div');
+            rowElem.className = 'board-row';
+
+            row.forEach(slotNum => {
+                if (slotNum === null) {
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'placeholder-slot';
+                    rowElem.appendChild(placeholder);
+                } else {
+                    const slotElem = document.createElement('div');
+                    slotElem.className = 'chess-slot';
+                    slotElem.id = `board-slot-${slotNum}`;
+
+                    boardElem.appendChild(slotElem);
+                    rowElem.appendChild(slotElem);
+                }
+            });
+
+            boardElem.appendChild(rowElem);
+        });
+    }
+
+    // 點擊頂部待抽區的棋子
+    function selectPieceFromPool(poolIndex) {
+        if (currentDrawOrder > 32) return;
+
+        syncUserInfoDisplay();
+
+        const poolPieceElem = document.getElementById(`pool-piece-${poolIndex}`);
+        if (!poolPieceElem || poolPieceElem.style.visibility === 'hidden') return;
+
+        // 隱藏頂部該棋子（代表已抽走）
+        poolPieceElem.style.visibility = 'hidden';
+
+        const pieceData = poolDeck[poolIndex];
+
+        // 紀錄第 1 支牌
+        if (currentDrawOrder === 1) {
+            firstPieceData = pieceData;
+        }
+
+        // 將棋子以「白底」放入命盤區
+        placePieceOnBoard(currentDrawOrder, pieceData);
+
+        currentDrawOrder++;
+
+        // 當抽滿 32 支時，自動產生第 33 支（同第 1 支）
+        if (currentDrawOrder === 33) {
+            placePieceOnBoard(33, firstPieceData);
+
+            // 解鎖所有下載按鈕
+            setButtonsDisabled(false);
+        }
+    }
+
+    // 在命盤位置上放置白底紅/黑字棋子
+    function placePieceOnBoard(slotNum, pieceData) {
+        const slotElem = document.getElementById(`board-slot-${slotNum}`);
+        if (!slotElem) return;
+
+        const pieceElem = document.createElement('div');
+        pieceElem.className = `chess-piece board-white ${pieceData.color}`;
+        pieceElem.innerText = pieceData.text;
+
+        // 插入到 slot 中
+        slotElem.appendChild(pieceElem);
+    }
+
+    // 同步顯示卦主資訊及今日日期
+    function syncUserInfoDisplay() {
+        document.getElementById('disp-name').innerText = document.getElementById('name').value.trim() || '未填寫';
+        document.getElementById('disp-gender').innerText = document.querySelector('input[name="gender"]:checked').value;
+        document.getElementById('disp-solar').innerText = document.getElementById('solar-date').value || '未填寫';
+        document.getElementById('disp-lunar').innerText = document.getElementById('lunar-date-display').value || '未換算';
+        document.getElementById('disp-marital').innerText = document.getElementById('marital-status').value;
+        document.getElementById('disp-children').innerText = document.querySelector('input[name="has-children"]:checked').value;
+        document.getElementById('disp-today').innerText = getTodayFormatted();
+    }
+
+    // 控制所有下載按鈕狀態
+    function setButtonsDisabled(disabled) {
+        document.querySelectorAll('.btn-png, .btn-pdf').forEach(btn => {
+            btn.disabled = disabled;
+        });
+    }
+
+    // 高清下載 PNG 圖片（檔名包含今日日期）
+    function downloadPNG() {
+        const target = document.getElementById('chart-area');
+        const name = document.getElementById('name').value.trim() || '卦主';
+        const todayStr = getTodayFormatted();
+        
+        html2canvas(target, { scale: 3, useCORS: true }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `象棋卜卦命盤_${name}_${todayStr}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    }
+
+    // 高清下載 PDF 檔案（檔名包含今日日期）
+    function downloadPDF() {
+        const { jsPDF } = window.jspdf;
+        const target = document.getElementById('chart-area');
+        const name = document.getElementById('name').value.trim() || '卦主';
+        const todayStr = getTodayFormatted();
+
+        html2canvas(target, { scale: 3, useCORS: true }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgProps = pdf.getImageProperties(imgData);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+            pdf.addImage(imgData, 'PNG', 0, 10, pdfWidth, pdfHeight);
+            pdf.save(`象棋卜卦命盤_${name}_${todayStr}.pdf`);
+        });
+    }
+</script>
+
+</body>
+</html>
