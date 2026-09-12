@@ -1071,13 +1071,13 @@
         const templateParams = {
             user_name: document.getElementById('name').value.trim(),
             user_email: userEmail,
-            gender: (document.querySelector('input[name="gender"]:checked') || {}).value || '未選擇',
+            user_gender: (document.querySelector('input[name="gender"]:checked') || {}).value || '未選擇',
             solar_date: document.getElementById('solar-date').value,
             lunar_date: document.getElementById('lunar-date-display').value,
             marital_status: document.getElementById('marital-status').value,
             has_children: (document.querySelector('input[name="has-children"]:checked') || {}).value || '未選擇',
             draw_date: getTodayFormatted(),
-            board_matrix_html: htmlMatrix
+            chess_matrix_html: htmlMatrix
         };
 
         emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
