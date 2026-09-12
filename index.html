@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>凱特的好命學院 - 象棋卜卦命盤系統</title>
+    <title>象棋卜卦命盤系統｜凱特的好命學院</title>
     <!-- 引入 Font Awesome 圖示庫 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- 引入 html2canvas 用於圖片導出 -->
@@ -97,24 +97,43 @@
             margin-left: 2px;
         }
 
+        /* 統一設定輸入框與下拉選單底色為白色 */
         .form-group input, .form-group select {
             padding: 10px 12px;
             border: 1px solid var(--border-color);
             border-radius: 6px;
             font-size: 16px;
+            background-color: #ffffff;
+            color: #333333;
+            box-sizing: border-box;
+        }
+
+        /* 農曆生日專用唯讀灰色底色 */
+        .form-group input.readonly-lunar {
+            background-color: #eeeeee !important;
+            color: #666666;
+            cursor: not-allowed;
         }
 
         .radio-group {
             display: flex;
             gap: 20px;
             align-items: center;
-            height: 40px;
+            height: 42px;
             font-size: 16px;
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0 12px;
+            box-sizing: border-box;
         }
 
         .radio-group label {
             font-weight: normal;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
         .guide-text {
@@ -571,7 +590,7 @@
 
         <div class="form-group">
             <label for="lunar-date-display">農曆生日（民國）</label>
-            <input type="text" id="lunar-date-display" readonly placeholder="自動換算" style="background: #eee;">
+            <input type="text" id="lunar-date-display" class="readonly-lunar" readonly placeholder="自動換算">
         </div>
 
         <div class="form-group">
@@ -641,7 +660,6 @@
     <div id="chart-area">
         <div class="user-info-display">
             <div class="info-item">姓名：<span id="disp-name">-</span></div>
-            <!-- 信箱區塊加上 ID，若未填寫會自動隱藏該欄位 -->
             <div class="info-item" id="disp-email-wrapper">信箱：<span id="disp-email">-</span></div>
             <div class="info-item">性別：<span id="disp-gender">-</span></div>
             <div class="info-item">國曆生日：<span id="disp-solar">-</span></div>
