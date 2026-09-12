@@ -86,6 +86,11 @@
             font-size: 16px;
         }
 
+        .required-star {
+            color: red;
+            margin-left: 2px;
+        }
+
         .form-group input, .form-group select {
             padding: 10px 12px;
             border: 1px solid var(--border-color);
@@ -443,17 +448,17 @@
     <!-- 卦主資訊表單 -->
     <div class="form-grid">
         <div class="form-group">
-            <label for="name">卦主姓名</label>
+            <label for="name">卦主姓名<span class="required-star">*</span></label>
             <input type="text" id="name" placeholder="請輸入姓名" value="" oninput="syncUserInfoDisplay()">
         </div>
 
         <div class="form-group">
-            <label for="email">電子信箱 (E-mail)</label>
+            <label for="email">電子信箱 (E-mail)<span class="required-star">*</span></label>
             <input type="email" id="email" placeholder="用以接收凱特回覆解讀" value="" oninput="syncUserInfoDisplay()">
         </div>
 
         <div class="form-group">
-            <label>性別</label>
+            <label>性別<span class="required-star">*</span></label>
             <div class="radio-group">
                 <label><input type="radio" name="gender" value="女" onchange="syncUserInfoDisplay()"> 女</label>
                 <label><input type="radio" name="gender" value="男" onchange="syncUserInfoDisplay()"> 男</label>
@@ -461,7 +466,7 @@
         </div>
 
         <div class="form-group">
-            <label for="solar-date">國曆出生年月日</label>
+            <label for="solar-date">國曆出生年月日<span class="required-star">*</span></label>
             <input type="date" id="solar-date" value="" placeholder="1990-01-01" onfocus="handleDateFocus(this)" onchange="updateLunarDate()">
         </div>
 
@@ -471,7 +476,7 @@
         </div>
 
         <div class="form-group">
-            <label for="marital-status">婚姻狀態</label>
+            <label for="marital-status">婚姻狀態<span class="required-star">*</span></label>
             <select id="marital-status" onchange="syncUserInfoDisplay()">
                 <option value="">請選擇...</option>
                 <option value="未婚">未婚</option>
@@ -482,7 +487,7 @@
         </div>
 
         <div class="form-group">
-            <label>是否有子女</label>
+            <label>是否有子女<span class="required-star">*</span></label>
             <div class="radio-group">
                 <label><input type="radio" name="has-children" value="是" onchange="syncUserInfoDisplay()"> 是</label>
                 <label><input type="radio" name="has-children" value="否" onchange="syncUserInfoDisplay()"> 否</label>
@@ -721,31 +726,45 @@
         });
     }
 
-    // 檢查必填欄位驗證
-    function validateFormFields() {
+    // 檢查必填欄位驗證（支援一次列出所有未填項目，並可帶入個別專屬檢查）
+    function validateFormFields(checkEmail = false) {
+        const missingFields = [];
+
+        const nameVal = document.getElementById('name').value.trim();
+        if (!nameVal) {
+            missingFields.push('卦主姓名');
+        }
+
+        if (checkEmail) {
+            const emailVal = document.getElementById('email').value.trim();
+            if (!emailVal) {
+                missingFields.push('電子信箱 (E-mail)');
+            }
+        }
+
         const genderElem = document.querySelector('input[name="gender"]:checked');
         if (!genderElem) {
-            alert("記得選擇「性別」！");
-            return false;
+            missingFields.push('性別');
         }
 
         const solarDate = document.getElementById('solar-date').value;
         if (!solarDate) {
-            alert("記得選擇「國曆出生年月日」！");
-            document.getElementById('solar-date').focus();
-            return false;
+            missingFields.push('國曆出生年月日');
         }
 
         const maritalStatus = document.getElementById('marital-status').value;
         if (!maritalStatus) {
-            alert("記得選擇「婚姻狀態」！");
-            document.getElementById('marital-status').focus();
-            return false;
+            missingFields.push('婚姻狀態');
         }
 
         const hasChildrenElem = document.querySelector('input[name="has-children"]:checked');
         if (!hasChildrenElem) {
-            alert("記得選擇「是否有子女」！");
+            missingFields.push('是否有子女');
+        }
+
+        if (missingFields.length > 0) {
+            const missingListText = missingFields.map(item => `• ${item}`).join('\n');
+            alert(`記得選擇/填寫以下項目❤️：\n\n${missingListText}`);
             return false;
         }
 
@@ -754,13 +773,6 @@
 
     function selectPieceFromPool(poolIndex) {
         if (currentDrawOrder > 32) return;
-
-        // 如果是第一抽，先檢查個人資料是否都有選擇
-        if (currentDrawOrder === 1) {
-            if (!validateFormFields()) {
-                return;
-            }
-        }
 
         syncUserInfoDisplay();
 
@@ -815,6 +827,11 @@
     }
 
     function generateImageModal() {
+        // 按下「產生命盤圖片」時進行欄位檢查 (不強制要求Email)
+        if (!validateFormFields(false)) {
+            return;
+        }
+
         const target = document.getElementById('chart-area');
         html2canvas(target, { scale: 3, useCORS: true }).then(canvas => {
             const imgUrl = canvas.toDataURL('image/png');
@@ -825,17 +842,12 @@
 
     // 透過 EmailJS 傳送純文字 HTML 陣列表格與 Email
     function sendEmailToKateViaJS(btnElem) {
-        // 先再次驗證必填項與 Email
-        if (!validateFormFields()) {
+        // 按下「傳送命盤給凱特」時進行欄位檢查 (強制包含Email)
+        if (!validateFormFields(true)) {
             return;
         }
 
         const userEmail = document.getElementById('email').value.trim();
-        if (!userEmail) {
-            alert('請先填寫您的「電子信箱 (E-mail)」，以便凱特回覆解讀結果給您！');
-            document.getElementById('email').focus();
-            return;
-        }
 
         const originalText = btnElem.innerText;
         btnElem.innerText = "⏳ 傳送中...";
