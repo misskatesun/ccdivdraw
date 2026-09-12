@@ -438,6 +438,11 @@
         </div>
 
         <div class="form-group">
+            <label for="email">電子信箱 (E-mail)</label>
+            <input type="email" id="email" placeholder="用以接收凱特回覆解讀" value="" oninput="syncUserInfoDisplay()">
+        </div>
+
+        <div class="form-group">
             <label>性別</label>
             <div class="radio-group">
                 <label><input type="radio" name="gender" value="女" checked onchange="syncUserInfoDisplay()"> 女</label>
@@ -499,6 +504,7 @@
     <div id="chart-area">
         <div class="user-info-display">
             <div class="info-item">姓名：<span id="disp-name">-</span></div>
+            <div class="info-item">信箱：<span id="disp-email">-</span></div>
             <div class="info-item">性別：<span id="disp-gender">-</span></div>
             <div class="info-item">國曆生日：<span id="disp-solar">-</span></div>
             <div class="info-item">農曆生日：<span id="disp-lunar">-</span></div>
@@ -724,6 +730,7 @@
 
     function syncUserInfoDisplay() {
         document.getElementById('disp-name').innerText = document.getElementById('name').value.trim() || '未填寫';
+        document.getElementById('disp-email').innerText = document.getElementById('email').value.trim() || '未填寫';
         document.getElementById('disp-gender').innerText = document.querySelector('input[name="gender"]:checked').value;
         document.getElementById('disp-solar').innerText = document.getElementById('solar-date').value || '未填寫';
         document.getElementById('disp-lunar').innerText = document.getElementById('lunar-date-display').value || '未換算';
@@ -747,8 +754,15 @@
         });
     }
 
-    // 透過 EmailJS 傳送純文字 HTML 陣列表格（完全不佔容量，完美展現棋盤陣型與紅黑色彩）
+    // 透過 EmailJS 傳送純文字 HTML 陣列表格與 Email
     function sendEmailToKateViaJS(btnElem) {
+        const userEmail = document.getElementById('email').value.trim();
+        if (!userEmail) {
+            alert('請先填寫您的「電子信箱 (E-mail)」，以便凱特回覆解讀結果給您！');
+            document.getElementById('email').focus();
+            return;
+        }
+
         const originalText = btnElem.innerText;
         btnElem.innerText = "⏳ 傳送中...";
         setButtonsDisabled(true);
@@ -785,6 +799,7 @@
 
         const templateParams = {
             user_name: document.getElementById('disp-name').innerText,
+            user_email: userEmail,
             user_gender: document.getElementById('disp-gender').innerText,
             solar_date: document.getElementById('disp-solar').innerText,
             lunar_date: document.getElementById('disp-lunar').innerText,
