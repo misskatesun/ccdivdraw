@@ -747,41 +747,64 @@
         });
     }
 
-    // 透過 EmailJS 背景自動傳送命盤與壓縮截圖給凱特（全體使用者適用）
+    // 透過 EmailJS 傳送純文字 HTML 陣列表格（完全不佔容量，完美展現棋盤陣型與紅黑色彩）
     function sendEmailToKateViaJS(btnElem) {
         const originalText = btnElem.innerText;
         btnElem.innerText = "⏳ 傳送中...";
         setButtonsDisabled(true);
 
-        const target = document.getElementById('chart-area');
-
-        // 將 scale 設為 1，並使用高壓縮率 JPEG，確保不論哪位訪客操作都能順利成功寄出
-        html2canvas(target, { scale: 1, useCORS: true }).then(canvas => {
-            const imgBase64 = canvas.toDataURL('image/jpeg', 0.3);
-
-            const templateParams = {
-                user_name: document.getElementById('disp-name').innerText,
-                user_gender: document.getElementById('disp-gender').innerText,
-                solar_date: document.getElementById('disp-solar').innerText,
-                lunar_date: document.getElementById('disp-lunar').innerText,
-                marital_status: document.getElementById('disp-marital').innerText,
-                has_children: document.getElementById('disp-children').innerText,
-                draw_date: document.getElementById('disp-today').innerText,
-                image_url: imgBase64
-            };
-
-            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
-                .then(function(response) {
-                    alert('🎉 命盤結果已成功傳送給凱特老師！');
-                    btnElem.innerText = originalText;
-                    setButtonsDisabled(false);
-                }, function(error) {
-                    alert('寄送失敗，請直接截圖畫面提供給凱特老師。');
-                    console.error('EmailJS Error:', error);
-                    btnElem.innerText = originalText;
-                    setButtonsDisabled(false);
-                });
+        // 動態生成 HTML 棋盤表格
+        let htmlMatrix = `<table style="border-collapse: collapse; margin: 15px 0; font-family: monospace, sans-serif; text-align: center;">`;
+        
+        BOARD_STRUCTURE.forEach(row => {
+            htmlMatrix += `<tr>`;
+            row.forEach(slotNum => {
+                if (slotNum === null) {
+                    htmlMatrix += `<td style="width: 50px; height: 50px; padding: 4px;"></td>`;
+                } else {
+                    const slotElem = document.getElementById(`board-slot-${slotNum}`);
+                    if (slotElem && slotElem.firstElementChild) {
+                        const isRed = slotElem.firstElementChild.classList.contains('red');
+                        const pieceText = slotElem.firstElementChild.innerText;
+                        const colorStyle = isRed ? 'color: #cc0000; border: 2px solid #cc0000;' : 'color: #111111; border: 2px solid #333333;';
+                        
+                        htmlMatrix += `
+                            <td style="width: 50px; height: 50px; padding: 4px;">
+                                <div style="width: 44px; height: 44px; line-height: 44px; border-radius: 50%; font-size: 22px; font-weight: bold; background: #ffffff; ${colorStyle} margin: 0 auto;">
+                                    ${pieceText}
+                                </div>
+                            </td>`;
+                    } else {
+                        htmlMatrix += `<td style="width: 50px; height: 50px; padding: 4px;"></td>`;
+                    }
+                }
+            });
+            htmlMatrix += `</tr>`;
         });
+        htmlMatrix += `</table>`;
+
+        const templateParams = {
+            user_name: document.getElementById('disp-name').innerText,
+            user_gender: document.getElementById('disp-gender').innerText,
+            solar_date: document.getElementById('disp-solar').innerText,
+            lunar_date: document.getElementById('disp-lunar').innerText,
+            marital_status: document.getElementById('disp-marital').innerText,
+            has_children: document.getElementById('disp-children').innerText,
+            draw_date: document.getElementById('disp-today').innerText,
+            chess_matrix_html: htmlMatrix
+        };
+
+        emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+            .then(function(response) {
+                alert('🎉 命盤結果已成功傳送給凱特！');
+                btnElem.innerText = originalText;
+                setButtonsDisabled(false);
+            }, function(error) {
+                alert('寄送失敗，請直接截圖畫面提供給凱特。');
+                console.error('EmailJS Error:', error);
+                btnElem.innerText = originalText;
+                setButtonsDisabled(false);
+            });
     }
 
     function closeModal(event) {
