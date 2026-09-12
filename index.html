@@ -550,7 +550,7 @@
 
 <script>
     // --------------------------------------------------
-    // 已自動填入您的 EmailJS 專屬 Key
+    // EmailJS 專屬設定
     // --------------------------------------------------
     const EMAILJS_PUBLIC_KEY = "pbW57ejv97hBE4rJR";
     const EMAILJS_SERVICE_ID = "service_bjgwhlc";
@@ -747,7 +747,7 @@
         });
     }
 
-    // 透過 EmailJS 背景自動傳送命盤與截圖給凱特
+    // 透過 EmailJS 背景自動傳送命盤與壓縮截圖給凱特（全體使用者適用）
     function sendEmailToKateViaJS(btnElem) {
         const originalText = btnElem.innerText;
         btnElem.innerText = "⏳ 傳送中...";
@@ -755,9 +755,9 @@
 
         const target = document.getElementById('chart-area');
 
-        // 將命盤繪製成 Base64 圖片
-        html2canvas(target, { scale: 2, useCORS: true }).then(canvas => {
-            const imgBase64 = canvas.toDataURL('image/png');
+        // 將 scale 設為 1，並使用高壓縮率 JPEG，確保不論哪位訪客操作都能順利成功寄出
+        html2canvas(target, { scale: 1, useCORS: true }).then(canvas => {
+            const imgBase64 = canvas.toDataURL('image/jpeg', 0.3);
 
             const templateParams = {
                 user_name: document.getElementById('disp-name').innerText,
