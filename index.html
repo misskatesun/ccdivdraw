@@ -19,7 +19,9 @@
             --card-bg: #ffffff;
             --primary-color: #8b0000;
             --border-color: #ccc;
-            --chess-gold: #D4B886;          /* 棋面新金色 */
+            /* 金色漸層與邊框更新為 #D4B886 調性 */
+            --gold-gradient: linear-gradient(135deg, #f5e8cf 0%, #D4B886 50%, #9e7f4c 100%);
+            --gold-border: #8f723e;
             
             /* 莫蘭迪色系定義 */
             --morandi-green: #768A76;       /* 莫蘭迪鼠尾草綠 (下載圖片) */
@@ -135,7 +137,7 @@
             gap: 12px;
             justify-content: center;
             background: #fdfbf7;
-            border: 2px dashed #d4af37;
+            border: 2px dashed #D4B886;
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 25px;
@@ -321,8 +323,8 @@
         }
 
         .chess-piece.gold {
-            background-color: var(--chess-gold);
-            border: 2px solid #b89b68;
+            background: var(--gold-gradient);
+            border: 2px solid var(--gold-border);
             color: transparent !important;
         }
 
@@ -918,6 +920,16 @@
         });
     }
 
+    function closeImageModal(event) {
+        if (event.target.id === 'image-modal') {
+            document.getElementById('image-modal').style.display = 'none';
+        }
+    }
+
+    function closeImageModalDirect() {
+        document.getElementById('image-modal').style.display = 'none';
+    }
+
     function sendEmailToKateViaJS(btnElem) {
         if (!validateFormFields(true)) {
             return;
@@ -948,7 +960,8 @@
                                 <div style="width: 44px; height: 44px; line-height: 44px; border-radius: 50%; font-size: 22px; font-weight: bold; background: #ffffff; ${colorStyle} margin: 0 auto;">
                                     ${pieceText}
                                 </div>
-                            </td>`;
+                            </td>
+                        `;
                     } else {
                         htmlMatrix += `<td style="width: 50px; height: 50px; padding: 4px;"></td>`;
                     }
@@ -959,38 +972,27 @@
         htmlMatrix += `</table>`;
 
         const templateParams = {
-            user_name: document.getElementById('disp-name').innerText,
+            user_name: document.getElementById('name').value.trim(),
             user_email: userEmail,
-            user_gender: document.getElementById('disp-gender').innerText,
-            solar_date: document.getElementById('disp-solar').innerText,
-            lunar_date: document.getElementById('disp-lunar').innerText,
-            marital_status: document.getElementById('disp-marital').innerText,
-            has_children: document.getElementById('disp-children').innerText,
-            draw_date: document.getElementById('disp-today').innerText,
-            chess_matrix_html: htmlMatrix
+            gender: (document.querySelector('input[name="gender"]:checked') || {}).value || '未選擇',
+            solar_date: document.getElementById('solar-date').value,
+            lunar_date: document.getElementById('lunar-date-display').value,
+            marital_status: document.getElementById('marital-status').value,
+            has_children: (document.querySelector('input[name="has-children"]:checked') || {}).value || '未選擇',
+            draw_date: getTodayFormatted(),
+            board_matrix_html: htmlMatrix
         };
 
         emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
             .then(function(response) {
-                showCustomAlert('🎉 命盤結果已成功傳送給凱特！');
+                showCustomAlert("✅ 命盤已成功傳送給凱特囉！");
                 btnElem.innerText = originalText;
                 setButtonsDisabled(false);
             }, function(error) {
-                showCustomAlert('寄送失敗，請直接截圖畫面提供給凱特。');
-                console.error('EmailJS Error:', error);
+                showCustomAlert("❌ 傳送失敗，請稍後再試或聯繫客服。");
                 btnElem.innerText = originalText;
                 setButtonsDisabled(false);
             });
-    }
-
-    function closeImageModal(event) {
-        if (event.target.id === 'image-modal') {
-            document.getElementById('image-modal').style.display = 'none';
-        }
-    }
-
-    function closeImageModalDirect() {
-        document.getElementById('image-modal').style.display = 'none';
     }
 </script>
 
