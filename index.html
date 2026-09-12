@@ -180,7 +180,7 @@
             transform: translateY(-1px);
         }
 
-        /* 綠色「產生命盤圖片」按鈕 */
+        /* 綠色「下載命盤圖片」按鈕 */
         button.btn-png {
             background-color: var(--green-btn-color);
         }
@@ -209,6 +209,33 @@
             text-align: center;
             line-height: 1.6;
             max-width: 90%;
+        }
+
+        /* 訂購個案服務按鈕區塊 */
+        .order-service-block {
+            margin-top: 18px;
+            text-align: center;
+        }
+
+        .order-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%);
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px 24px;
+            border-radius: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transition: all 0.2s;
+        }
+
+        .order-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+            background: linear-gradient(135deg, #e5be48 0%, #bb8d22 100%);
         }
 
         #chart-area {
@@ -461,8 +488,8 @@
         </div>
 
         <div class="form-group">
-            <label for="email">電子信箱 (E-mail)<span class="required-star">*</span></label>
-            <input type="email" id="email" placeholder="用以接收凱特回覆解讀" value="" oninput="syncUserInfoDisplay()">
+            <label for="email">電子信箱 (E-mail)</label>
+            <input type="email" id="email" placeholder="付費個案用以接收凱特回覆解讀" value="" oninput="syncUserInfoDisplay()">
         </div>
 
         <div class="form-group">
@@ -522,12 +549,17 @@
     <div class="action-wrapper">
         <div class="btn-notice">若無法下載，請務必自行截圖</div>
         <div class="actions">
-            <button onclick="generateImageModal()" class="btn-png" disabled>🖼️ 產生命盤圖片</button>
-            <button onclick="sendEmailToKateViaJS(this)" class="btn-email btn-action" disabled>📧 傳送命盤給凱特</button>
+            <button onclick="generateImageModal()" class="btn-png" disabled>🖼️ 下載命盤圖片</button>
+            <button onclick="sendEmailToKateViaJS(this)" class="btn-email btn-action" disabled>📧 付費個案傳送命盤給凱特</button>
         </div>
         <div class="download-tip">
-            📱 點擊「產生命盤圖片」後可長按儲存<br>
-            📧 個案請點擊「傳送命盤給凱特」直接寄出結果
+            📱 點擊「下載命盤圖片」後可長按儲存<br>
+            📧 個案請點擊「付費個案傳送命盤給凱特」直接寄出結果
+        </div>
+        <div class="order-service-block">
+            <a href="https://www.katesunhealing.com/service" target="_blank" class="order-btn">
+                👉 點此訂購個案服務（凱特解讀＋療癒建議）
+            </a>
         </div>
     </div>
 
@@ -551,12 +583,17 @@
     <div class="action-wrapper" style="margin-top: 30px;">
         <div class="btn-notice">若無法下載，請務必自行截圖</div>
         <div class="actions">
-            <button onclick="generateImageModal()" class="btn-png" disabled>🖼️ 產生命盤圖片</button>
-            <button onclick="sendEmailToKateViaJS(this)" class="btn-email btn-action" disabled>📧 傳送命盤給凱特</button>
+            <button onclick="generateImageModal()" class="btn-png" disabled>🖼️ 下載命盤圖片</button>
+            <button onclick="sendEmailToKateViaJS(this)" class="btn-email btn-action" disabled>📧 付費個案傳送命盤給凱特</button>
         </div>
         <div class="download-tip">
-            📱 點擊「產生命盤圖片」後可長按儲存<br>
-            📧 個案請點擊「傳送命盤給凱特」直接寄出結果
+            📱 點擊「下載命盤圖片」後可長按儲存<br>
+            📧 個案請點擊「付費個案傳送命盤給凱特」直接寄出結果
+        </div>
+        <div class="order-service-block">
+            <a href="https://www.katesunhealing.com/service" target="_blank" class="order-btn">
+                👉 點此訂購個案服務（凱特解讀＋療癒建議）
+            </a>
         </div>
     </div>
 
@@ -664,7 +701,6 @@
         return `${year}-${month}-${day}`;
     }
 
-    // 點擊日曆時，預設定位在 1990-01-01 方便選取
     function handleDateFocus(inputElem) {
         if (!inputElem.value) {
             inputElem.value = "1990-01-01";
@@ -747,7 +783,6 @@
         });
     }
 
-    // 自訂溫馨提示視窗控制
     function showCustomAlert(htmlContent) {
         document.getElementById('custom-alert-message').innerHTML = htmlContent;
         document.getElementById('custom-alert-modal').style.display = 'flex';
@@ -858,7 +893,6 @@
     }
 
     function generateImageModal() {
-        // 按下「產生命盤圖片」時進行欄位檢查 (不強制要求Email)
         if (!validateFormFields(false)) {
             return;
         }
@@ -871,9 +905,7 @@
         });
     }
 
-    // 透過 EmailJS 傳送純文字 HTML 陣列表格與 Email
     function sendEmailToKateViaJS(btnElem) {
-        // 按下「傳送命盤給凱特」時進行欄位檢查 (強制包含Email)
         if (!validateFormFields(true)) {
             return;
         }
@@ -884,7 +916,6 @@
         btnElem.innerText = "⏳ 傳送中...";
         setButtonsDisabled(true);
 
-        // 動態生成 HTML 棋盤表格
         let htmlMatrix = `<table style="border-collapse: collapse; margin: 15px 0; font-family: monospace, sans-serif; text-align: center;">`;
         
         BOARD_STRUCTURE.forEach(row => {
