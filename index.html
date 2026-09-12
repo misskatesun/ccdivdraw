@@ -29,6 +29,10 @@
             --morandi-blue-hover: #586B7E;
             --morandi-orange: #E0A98B;      /* 莫蘭迪淡橘 (點此訂購) */
             --morandi-orange-hover: #CB9477;
+            --morandi-red: #C85A1B;         /* 莫蘭迪紅棕 (YouTube影片按鈕) */
+            --morandi-red-hover: #b04e16;
+            --morandi-purple: #8E7C93;      /* 莫蘭迪紫灰 (線上課按鈕) */
+            --morandi-purple-hover: #79687E;
         }
 
         body {
@@ -391,8 +395,93 @@
             visibility: hidden;
         }
 
+        /* 學習與教學資源專區樣式 */
+        .learning-section {
+            margin-top: 35px;
+            background: #fcf6ed;
+            border: 1px solid #ebd8c1;
+            border-radius: 12px;
+            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .learning-card {
+            margin-bottom: 20px;
+        }
+
+        .learning-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .learning-card-title {
+            font-size: 17px;
+            font-weight: bold;
+            color: #5a3e1b;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .learning-card-desc {
+            font-size: 14px;
+            color: #666666;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .learning-btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .learning-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 18px;
+            font-size: 15px;
+            font-weight: bold;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            flex: 1;
+            min-width: 160px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .learning-btn.video-btn {
+            background-color: var(--morandi-red);
+        }
+
+        .learning-btn.video-btn:hover {
+            background-color: var(--morandi-red-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .learning-btn.course-btn {
+            background-color: var(--morandi-purple);
+            width: 100%;
+            flex: none;
+            padding: 12px 20px;
+            font-size: 16px;
+        }
+
+        .learning-btn.course-btn:hover {
+            background-color: var(--morandi-purple-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
         .social-footer {
-            margin-top: 40px;
+            margin-top: 25px;
             padding-top: 20px;
             border-top: 1px solid #e0e0e0;
             display: flex;
@@ -554,6 +643,9 @@
                 height: 36px;
                 font-size: 22px;
             }
+            .learning-btn {
+                min-width: 100%;
+            }
         }
     </style>
 </head>
@@ -687,6 +779,29 @@
             <div class="order-title-text">想要請凱特解讀＋療癒建議嗎？</div>
             <a href="https://www.katesunhealing.com/service" target="_blank" class="order-btn">
                 👉 點此訂購
+            </a>
+        </div>
+    </div>
+
+    <!-- 學習與教學資源專區 -->
+    <div class="learning-section">
+        <div class="learning-card">
+            <div class="learning-card-title">🧡 簡易象棋卜卦影片教學</div>
+            <div class="learning-btn-group">
+                <a href="https://youtu.be/qdedlEn4tjA" target="_blank" class="learning-btn video-btn">
+                    <i class="fab fa-youtube"></i> ▶️ 影片①：教學影片
+                </a>
+                <a href="https://youtu.be/cKhf3RnWLDk" target="_blank" class="learning-btn video-btn">
+                    <i class="fab fa-youtube"></i> ▶️ 影片②：教學影片
+                </a>
+            </div>
+        </div>
+
+        <div class="learning-card" style="margin-top: 25px;">
+            <div class="learning-card-title">🧡 凱特的【基礎象棋卜卦線上課】</div>
+            <div class="learning-card-desc">自己學會看命盤、單卦＋療癒資料（預錄好的課程，隨時隨地馬上上課）</div>
+            <a href="https://www.katesunhealing.com/chesscourse" target="_blank" class="learning-btn course-btn">
+                👉 點此了解課程詳情
             </a>
         </div>
     </div>
@@ -973,7 +1088,6 @@
         slotElem.appendChild(pieceElem);
     }
 
-    /* 同步卦主資訊顯示：未填寫 Email 時直接隱藏該行 */
     function syncUserInfoDisplay() {
         const genderElem = document.querySelector('input[name="gender"]:checked');
         const childrenElem = document.querySelector('input[name="has-children"]:checked');
@@ -982,7 +1096,6 @@
 
         document.getElementById('disp-name').innerText = document.getElementById('name').value.trim() || '未填寫';
         
-        // 若信箱未填寫，完全隱藏信箱列
         if (emailVal) {
             emailWrapper.style.display = 'block';
             document.getElementById('disp-email').innerText = emailVal;
@@ -1082,7 +1195,7 @@
 
         emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
             .then(function(response) {
-                showCustomAlert("✅ 命盤已成功傳送給凱特囉！");
+                showCustomAlert("✅ 命盤已成功傳送給凱特囉！你也要記得下載圖片檔至你的手機/電腦裡備存哦");
                 btnElem.innerText = originalText;
                 setButtonsDisabled(false);
             }, function(error) {
