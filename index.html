@@ -101,7 +101,6 @@
             margin-left: 2px;
         }
 
-        /* 統一設定輸入框與下拉選單底色為白色 */
         .form-group input, .form-group select {
             padding: 10px 12px;
             border: 1px solid var(--border-color);
@@ -112,7 +111,6 @@
             box-sizing: border-box;
         }
 
-        /* 農曆生日專用唯讀灰色底色 */
         .form-group input.readonly-lunar {
             background-color: #eeeeee !important;
             color: #666666;
@@ -153,7 +151,6 @@
             line-height: 1.8;
         }
 
-        /* 抽棋進度提示列 */
         .draw-status-bar {
             text-align: center;
             font-size: 16px;
@@ -176,7 +173,6 @@
             font-size: 15px;
         }
 
-        /* 獨立出來的滑動提示文字 */
         .scroll-hint-text {
             text-align: center;
             font-size: 14px;
@@ -395,7 +391,6 @@
             visibility: hidden;
         }
 
-        /* 學習與教學資源專區樣式 */
         .learning-section {
             margin-top: 35px;
             background: #fcf6ed;
@@ -529,7 +524,6 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
-        /* 彈出視窗通用樣式 */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -652,7 +646,6 @@
     <div class="header-title">凱特的好命學院</div>
     <h1>象棋卜卦命盤系統</h1>
 
-    <!-- 卦主資訊表單 -->
     <div class="form-grid">
         <div class="form-group">
             <label for="name">卦主姓名<span class="required-star">*</span></label>
@@ -702,7 +695,6 @@
         </div>
     </div>
 
-    <!-- 指導靈提示文字 -->
     <div class="guide-text">
         一事不二問<br>
         象棋命盤一生只能抽一次<br>
@@ -714,19 +706,15 @@
         唸完即可開始抽棋子
     </div>
 
-    <!-- 抽棋進度與狀態提示列 -->
     <div class="draw-status-bar">
         <span>🎯 抽棋進度：<span id="draw-count">0</span> / 32</span>
         <span class="latest-piece" id="latest-piece-info">點選金棋開始抽盤</span>
     </div>
 
-    <!-- 獨立顯示於「抽棋進度」與 32 支棋子中間的提示文字 -->
     <div class="scroll-hint-text">（可滑動至下方看抽取結果）</div>
 
-    <!-- 待抽區：32張蓋著的金棋 -->
     <div class="pool-container" id="pool-area"></div>
 
-    <!-- 頂部按鈕組（自動捲動目標區域） -->
     <div class="action-wrapper" id="target-notice-area">
         <div class="btn-notice">若無法下載，請務必自行截圖</div>
         <div class="actions">
@@ -745,7 +733,6 @@
         </div>
     </div>
 
-    <!-- 命盤可視化輸出區域 -->
     <div id="chart-area">
         <div class="user-info-display">
             <div class="info-item">姓名：<span id="disp-name">-</span></div>
@@ -761,7 +748,6 @@
         <div class="board-container" id="board"></div>
     </div>
 
-    <!-- 命盤底部的按鈕組 -->
     <div class="action-wrapper" style="margin-top: 30px;">
         <div class="btn-notice">若無法下載，請務必自行截圖</div>
         <div class="actions">
@@ -780,7 +766,6 @@
         </div>
     </div>
 
-    <!-- 學習與教學資源專區 -->
     <div class="learning-section">
         <div class="learning-card">
             <div class="learning-card-title">🧡 簡易象棋卜卦影片教學</div>
@@ -806,7 +791,6 @@
         </div>
     </div>
 
-    <!-- 頁尾社群媒體連結 -->
     <div class="social-footer">
         <div class="footer-text">關注 凱特的好命學院 社群媒體：</div>
         <div class="social-links">
@@ -823,7 +807,6 @@
     </div>
 </div>
 
-<!-- 溫馨提示彈出視窗 Alert Modal -->
 <div id="custom-alert-modal" class="modal-overlay" onclick="closeCustomAlert()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-title">溫馨提示 ❤️</div>
@@ -832,7 +815,6 @@
     </div>
 </div>
 
-<!-- 彈出圖片儲存視窗 Image Modal -->
 <div id="image-modal" class="modal-overlay" onclick="closeImageModal(event)">
     <div class="modal-close-fixed-x" onclick="closeImageModalDirect()" title="關閉視窗">&times;</div>
     <div class="modal-content" style="max-width: 90%;" onclick="event.stopPropagation()">
@@ -1151,13 +1133,41 @@
         btnElem.innerText = "⏳ 傳送中...";
         setButtonsDisabled(true);
 
-        let htmlMatrix = `<table style="border-collapse: collapse; margin: 15px 0; font-family: monospace, sans-serif; text-align: center;">`;
+        // 產生保留圓形圖案與旁邊對應標籤的 Email 排盤結構
+        let htmlMatrix = `<table style="border-collapse: collapse; margin: 15px auto; font-family: sans-serif; text-align: center;">`;
         
-        BOARD_STRUCTURE.forEach(row => {
+        // 定義每一列對應的標籤（依據您提供的結構與範圍）
+        const rowLabels = {
+            0: "總格 (1-5支)",       // 第4格
+            1: "",                   // 第2, 1, 3格
+            2: "學習格 / 11-20歲",     // 第5格
+            3: "",                   // 第7, 6, 8格
+            4: "情感格 / 21-30歲",     // 第9格
+            5: "",                   // 第11, 10, 12格
+            6: "事業格 / 31-40歲",     // 第13格
+            7: "",                   // 第15, 14, 16格
+            8: "41-50歲",            // 第17格
+            9: "",                   // 第19, 18, 20格
+            10: "51-60歲",           // 第21格
+            11: "",                  // 第23, 22, 24格
+            12: "61-70歲",           // 第25格
+            13: "",                  // 第27, 26, 28格
+            14: "71-80歲",           // 第29格
+            15: "",                  // 第31, 30, 32格
+            16: ""                   // 第33格
+        };
+
+        BOARD_STRUCTURE.forEach((row, rowIndex) => {
             htmlMatrix += `<tr>`;
+            
+            // 左側標籤欄位
+            const labelText = rowLabels[rowIndex] || "";
+            htmlMatrix += `<td style="padding: 4px 12px; font-size: 13px; color: #8b0000; font-weight: bold; text-align: right; white-space: nowrap; width: 130px;">${labelText}</td>`;
+
+            // 棋子排版欄位
             row.forEach(slotNum => {
                 if (slotNum === null) {
-                    htmlMatrix += `<td style="width: 50px; height: 50px; padding: 4px;"></td>`;
+                    htmlMatrix += `<td style="width: 44px; height: 44px; padding: 2px;"></td>`;
                 } else {
                     const slotElem = document.getElementById(`board-slot-${slotNum}`);
                     if (slotElem && slotElem.firstElementChild) {
@@ -1166,14 +1176,14 @@
                         const colorStyle = isRed ? 'color: #cc0000; border: 2px solid #cc0000;' : 'color: #111111; border: 2px solid #333333;';
                         
                         htmlMatrix += `
-                            <td style="width: 50px; height: 50px; padding: 4px;">
-                                <div style="width: 44px; height: 44px; line-height: 44px; border-radius: 50%; font-size: 22px; font-weight: bold; background: #ffffff; ${colorStyle} margin: 0 auto;">
+                            <td style="width: 44px; height: 44px; padding: 2px; text-align: center;">
+                                <div style="width: 38px; height: 38px; line-height: 38px; border-radius: 50%; font-size: 18px; font-weight: bold; background: #ffffff; ${colorStyle} margin: 0 auto;">
                                     ${pieceText}
                                 </div>
                             </td>
                         `;
                     } else {
-                        htmlMatrix += `<td style="width: 50px; height: 50px; padding: 4px;"></td>`;
+                        htmlMatrix += `<td style="width: 44px; height: 44px; padding: 2px;"></td>`;
                     }
                 }
             });
@@ -1190,7 +1200,7 @@
             marital_status: document.getElementById('marital-status').value,
             has_children: (document.querySelector('input[name="has-children"]:checked') || {}).value || '未選擇',
             draw_date: getTodayFormatted(),
-            chess_matrix_html: htmlMatrix
+            chess_matrix_html: htmlMatrix  // 帶入保留圓形棋子結構與左側標籤的表格
         };
 
         emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
