@@ -96,11 +96,6 @@
             font-size: 16px;
         }
 
-        .required-star {
-            color: red;
-            margin-left: 2px;
-        }
-
         .form-group input, .form-group select {
             padding: 10px 12px;
             border: 1px solid var(--border-color);
@@ -707,7 +702,7 @@
     </div>
 
     <div class="draw-status-bar">
-        <span>🎯 抽棋進度：<span id="draw-count">0</span> / 33</span>
+        <span>🎯 抽棋進度：<span id="draw-count">0</span> / 32</span>
         <span class="latest-piece" id="latest-piece-info">點選金棋開始抽盤</span>
     </div>
 
@@ -870,7 +865,7 @@
         [27, 26, 28],
         [null, 29, null],
         [31, 30, 32],
-        [null, 33, null]
+        [null, 33, null] // 這是對應第33格（自動填入第一支棋子）
     ];
 
     let poolDeck = [];
@@ -1022,6 +1017,7 @@
         pieceElem.style.opacity = '0.3';
         pieceElem.style.pointerEvents = 'none';
 
+        // 填入當前抽到的格子
         const slotElem = document.getElementById(`board-slot-${currentDrawOrder}`);
         if (slotElem) {
             slotElem.innerHTML = '';
@@ -1031,27 +1027,27 @@
             slotElem.appendChild(placedPiece);
         }
 
-        // 如果抽到第33支，自動將其填入最頂端對應的第4支位置
-        if (currentDrawOrder === 33 && firstPieceData) {
-            const slot4Elem = document.getElementById(`board-slot-4`);
-            if (slot4Elem) {
-                slot4Elem.innerHTML = '';
-                const extraPiece = document.createElement('div');
-                extraPiece.className = `chess-piece board-white ${firstPieceData.color}`;
-                extraPiece.innerText = firstPieceData.text;
-                slot4Elem.appendChild(extraPiece);
-            }
-        }
-
         document.getElementById('draw-count').innerText = currentDrawOrder;
         document.getElementById('latest-piece-info').innerText = `第 ${currentDrawOrder} 支抽到：【${pieceData.text}】`;
 
         currentDrawOrder++;
 
-        if (currentDrawOrder > 33) {
-            document.getElementById('latest-piece-info').innerText = "🎉 33支象棋已全部抽取完成！";
+        // 當點完第 32 支時，自動將第 1 支的棋子填入頂端的第 33 格（命盤最上方對應位置）
+        if (currentDrawOrder === 33 && firstPieceData) {
+            const slot33Elem = document.getElementById(`board-slot-33`);
+            if (slot33Elem) {
+                slot33Elem.innerHTML = '';
+                const extraPiece = document.createElement('div');
+                extraPiece.className = `chess-piece board-white ${firstPieceData.color}`;
+                extraPiece.innerText = firstPieceData.text;
+                slot33Elem.appendChild(extraPiece);
+            }
+        }
+
+        if (currentDrawOrder > 32) {
+            document.getElementById('latest-piece-info').innerText = "🎉 32支象棋已全部抽取完成！";
             setButtonsDisabled(false);
-            showCustomAlert("恭喜您！33支象棋已全部抽取完成！<br>您可以檢視下方完整命盤，並點選按鈕下載圖片或傳送給凱特❤️");
+            showCustomAlert("恭喜您！象棋命盤已全部抽取完成（第 33 格已自動完成）！<br>您可以檢視下方完整命盤，並點選按鈕下載圖片或傳送給凱特❤️");
         }
     }
 
