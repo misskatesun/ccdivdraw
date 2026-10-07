@@ -648,7 +648,7 @@
 
     <div class="form-grid">
         <div class="form-group">
-            <label for="name">卦主姓名<span class="required-star">*</span></label>
+            <label for="name">卦主姓名</label>
             <input type="text" id="name" placeholder="請輸入姓名" value="" oninput="syncUserInfoDisplay()">
         </div>
 
@@ -658,7 +658,7 @@
         </div>
 
         <div class="form-group">
-            <label>性別<span class="required-star">*</span></label>
+            <label>性別</label>
             <div class="radio-group">
                 <label><input type="radio" name="gender" value="女" onchange="syncUserInfoDisplay()"> 女</label>
                 <label><input type="radio" name="gender" value="男" onchange="syncUserInfoDisplay()"> 男</label>
@@ -666,7 +666,7 @@
         </div>
 
         <div class="form-group">
-            <label for="solar-date">國曆出生年月日<span class="required-star">*</span></label>
+            <label for="solar-date">國曆出生年月日</label>
             <input type="date" id="solar-date" value="" placeholder="1990-01-01" onfocus="handleDateFocus(this)" onchange="updateLunarDate()">
         </div>
 
@@ -676,7 +676,7 @@
         </div>
 
         <div class="form-group">
-            <label for="marital-status">婚姻狀態<span class="required-star">*</span></label>
+            <label for="marital-status">婚姻狀態</label>
             <select id="marital-status" onchange="syncUserInfoDisplay()">
                 <option value="">請選擇...</option>
                 <option value="未婚">未婚</option>
@@ -687,7 +687,7 @@
         </div>
 
         <div class="form-group">
-            <label>是否有子女<span class="required-star">*</span></label>
+            <label>是否有子女</label>
             <div class="radio-group">
                 <label><input type="radio" name="has-children" value="是" onchange="syncUserInfoDisplay()"> 是</label>
                 <label><input type="radio" name="has-children" value="否" onchange="syncUserInfoDisplay()"> 否</label>
@@ -983,44 +983,6 @@
         document.getElementById('custom-alert-modal').style.display = 'none';
     }
 
-    function validateFormFields(checkEmail = false) {
-        const missingFields = [];
-
-        const nameVal = document.getElementById('name').value.trim();
-        if (!nameVal) {
-            missingFields.push('卦主姓名');
-        }
-
-        if (checkEmail) {
-            const emailVal = document.getElementById('email').value.trim();
-            if (!emailVal) {
-                missingFields.push('電子信箱 (E-mail)');
-            }
-        }
-
-        const genderElem = document.querySelector('input[name="gender"]:checked');
-        if (!genderElem) {
-            missingFields.push('性別');
-        }
-
-        const solarVal = document.getElementById('solar-date').value;
-        if (!solarVal) {
-            missingFields.push('國曆出生年月日');
-        }
-
-        const maritalVal = document.getElementById('marital-status').value;
-        if (!maritalVal) {
-            missingFields.push('婚姻狀態');
-        }
-
-        const childrenElem = document.querySelector('input[name="has-children"]:checked');
-        if (!childrenElem) {
-            missingFields.push('是否有子女');
-        }
-
-        return missingFields;
-    }
-
     function syncUserInfoDisplay() {
         const name = document.getElementById('name').value.trim();
         const email = document.getElementById('email').value.trim();
@@ -1048,12 +1010,6 @@
     }
 
     function selectPieceFromPool(poolIndex) {
-        const missingFields = validateFormFields(false);
-        if (missingFields.length > 0) {
-            showCustomAlert(`請先完整填寫上方必填欄位：<br><span style="color:red; font-weight:bold;">${missingFields.join('、')}</span>`);
-            return;
-        }
-
         const pieceElem = document.getElementById(`pool-piece-${poolIndex}`);
         if (pieceElem.style.opacity === '0.3') return;
 
@@ -1088,15 +1044,8 @@
     }
 
     function generateImageModal() {
-        const missingFields = validateFormFields(false);
-        if (missingFields.length > 0) {
-            showCustomAlert(`請先完整填寫上方必填欄位：<br><span style="color:red; font-weight:bold;">${missingFields.join('、')}</span>`);
-            return;
-        }
-
         const chartArea = document.getElementById('chart-area');
         
-        // 暫時調整樣式確保截圖完美
         const originalBoxShadow = chartArea.style.boxShadow;
         chartArea.style.boxShadow = 'none';
 
@@ -1124,9 +1073,9 @@
     }
 
     function sendEmailToKateViaJS(btnElem) {
-        const missingFields = validateFormFields(true);
-        if (missingFields.length > 0) {
-            showCustomAlert(`付費個案請完整填寫以下欄位以接收回覆：<br><span style="color:red; font-weight:bold;">${missingFields.join('、')}</span>`);
+        const email = document.getElementById('email').value.trim();
+        if (!email) {
+            showCustomAlert("請先填寫您的電子信箱 (E-mail)，以便凱特收到後回覆解讀給您❤️");
             return;
         }
 
@@ -1134,13 +1083,14 @@
         btnElem.disabled = true;
         btnElem.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在傳送命盤...';
 
-        const name = document.getElementById('name').value.trim();
-        const email = document.getElementById('email').value.trim();
-        const gender = document.querySelector('input[name="gender"]:checked').value;
-        const solar = document.getElementById('solar-date').value;
-        const lunar = document.getElementById('lunar-date-display').value;
-        const marital = document.getElementById('marital-status').value;
-        const children = document.querySelector('input[name="has-children"]:checked').value;
+        const name = document.getElementById('name').value.trim() || '未填寫姓名';
+        const genderElem = document.querySelector('input[name="gender"]:checked');
+        const gender = genderElem ? genderElem.value : '未填寫';
+        const solar = document.getElementById('solar-date').value || '未填寫';
+        const lunar = document.getElementById('lunar-date-display').value || '未填寫';
+        const marital = document.getElementById('marital-status').value || '未填寫';
+        const childrenElem = document.querySelector('input[name="has-children"]:checked');
+        const children = childrenElem ? childrenElem.value : '未填寫';
         const todayStr = getTodayFormatted();
 
         let boardSummary = "";
