@@ -21,17 +21,17 @@
             --border-color: #ccc;
             --gold-gradient: linear-gradient(135deg, #f5e8cf 0%, #D4B886 50%, #9e7f4c 100%);
             --gold-border: #8f723e;
-
+            
             /* 色系定義 */
-            --morandi-green: #768A76;        /* 莫蘭迪鼠尾草綠 (下載圖片) */
+            --morandi-green: #768A76;       /* 莫蘭迪鼠尾草綠 (下載圖片) */
             --morandi-green-hover: #637563;
-            --morandi-blue: #6B8299;         /* 莫蘭迪霧灰藍 (傳送給凱特) */
+            --morandi-blue: #6B8299;        /* 莫蘭迪霧灰藍 (傳送給凱特) */
             --morandi-blue-hover: #586B7E;
-            --morandi-orange: #E0A98B;       /* 莫蘭迪淡橘 (點此訂購) */
+            --morandi-orange: #E0A98B;      /* 莫蘭迪淡橘 (點此訂購) */
             --morandi-orange-hover: #CB9477;
-            --morandi-red: #C85A1B;          /* 莫蘭迪紅棕 (YouTube影片按鈕) */
+            --morandi-red: #C85A1B;         /* 莫蘭迪紅棕 (YouTube影片按鈕) */
             --morandi-red-hover: #b04e16;
-            --course-blue: #376996;          /* 指定課程按鈕藍色 */
+            --course-blue: #376996;         /* 指定課程按鈕藍色 */
             --course-blue-hover: #2b5377;
         }
 
@@ -94,6 +94,11 @@
             margin-bottom: 6px;
             color: #333;
             font-size: 16px;
+        }
+
+        .required-star {
+            color: red;
+            margin-left: 2px;
         }
 
         .form-group input, .form-group select {
@@ -643,7 +648,7 @@
 
     <div class="form-grid">
         <div class="form-group">
-            <label for="name">卦主姓名</label>
+            <label for="name">卦主姓名<span class="required-star">*</span></label>
             <input type="text" id="name" placeholder="請輸入姓名" value="" oninput="syncUserInfoDisplay()">
         </div>
 
@@ -653,7 +658,7 @@
         </div>
 
         <div class="form-group">
-            <label>性別</label>
+            <label>性別<span class="required-star">*</span></label>
             <div class="radio-group">
                 <label><input type="radio" name="gender" value="女" onchange="syncUserInfoDisplay()"> 女</label>
                 <label><input type="radio" name="gender" value="男" onchange="syncUserInfoDisplay()"> 男</label>
@@ -661,7 +666,7 @@
         </div>
 
         <div class="form-group">
-            <label for="solar-date">國曆出生年月日</label>
+            <label for="solar-date">國曆出生年月日<span class="required-star">*</span></label>
             <input type="date" id="solar-date" value="" placeholder="1990-01-01" onfocus="handleDateFocus(this)" onchange="updateLunarDate()">
         </div>
 
@@ -671,7 +676,7 @@
         </div>
 
         <div class="form-group">
-            <label for="marital-status">婚姻狀態</label>
+            <label for="marital-status">婚姻狀態<span class="required-star">*</span></label>
             <select id="marital-status" onchange="syncUserInfoDisplay()">
                 <option value="">請選擇...</option>
                 <option value="未婚">未婚</option>
@@ -682,7 +687,7 @@
         </div>
 
         <div class="form-group">
-            <label>是否有子女</label>
+            <label>是否有子女<span class="required-star">*</span></label>
             <div class="radio-group">
                 <label><input type="radio" name="has-children" value="是" onchange="syncUserInfoDisplay()"> 是</label>
                 <label><input type="radio" name="has-children" value="否" onchange="syncUserInfoDisplay()"> 否</label>
@@ -838,7 +843,7 @@
         { text: '傌', color: 'red' }, { text: '傌', color: 'red' },
         { text: '炮', color: 'red' }, { text: '炮', color: 'red' },
         { text: '兵', color: 'red' }, { text: '兵', color: 'red' }, { text: '兵', color: 'red' }, { text: '兵', color: 'red' }, { text: '兵', color: 'red' },
-
+        
         { text: '將', color: 'black' },
         { text: '士', color: 'black' }, { text: '士', color: 'black' },
         { text: '象', color: 'black' }, { text: '象', color: 'black' },
@@ -849,7 +854,7 @@
     ];
 
     const BOARD_STRUCTURE = [
-        [null, 33, null], // 命盤最上方（第33格，對應第4支抽的棋子）
+        [null, 4, null],
         [2, 1, 3],
         [null, 5, null],
         [7, 6, 8],
@@ -864,12 +869,13 @@
         [null, 25, null],
         [27, 26, 28],
         [null, 29, null],
-        [31, 30, 32]
+        [31, 30, 32],
+        [null, 33, null]
     ];
 
     let poolDeck = [];
     let currentDrawOrder = 1;
-    let fourthPieceData = null; // 記錄第4支抽到的棋子
+    let fourthPieceData = null;
 
     window.onload = function() {
         startNewDivination();
@@ -898,7 +904,7 @@
             return;
         }
         const [year, month, day] = solarVal.split('-').map(Number);
-
+        
         try {
             const solar = Solar.fromYmd(year, month, day);
             const lunar = solar.getLunar();
@@ -977,103 +983,139 @@
         document.getElementById('custom-alert-modal').style.display = 'none';
     }
 
-    function syncUserInfoDisplay() {
-        const name = document.getElementById('name').value.trim();
-        const email = document.getElementById('email').value.trim();
+    function validateFormFields(checkEmail = false) {
+        const missingFields = [];
+
+        const nameVal = document.getElementById('name').value.trim();
+        if (!nameVal) {
+            missingFields.push('卦主姓名');
+        }
+
+        if (checkEmail) {
+            const emailVal = document.getElementById('email').value.trim();
+            if (!emailVal) {
+                missingFields.push('電子信箱 (E-mail)');
+            }
+        }
+
         const genderElem = document.querySelector('input[name="gender"]:checked');
-        const solar = document.getElementById('solar-date').value;
-        const lunar = document.getElementById('lunar-date-display').value;
-        const marital = document.getElementById('marital-status').value;
-        const childrenElem = document.querySelector('input[name="has-children"]:checked');
+        if (!genderElem) {
+            missingFields.push('性別');
+        }
 
-        document.getElementById('disp-name').innerText = name || '-';
-        document.getElementById('disp-email').innerText = email || '-';
-        document.getElementById('disp-gender').innerText = genderElem ? genderElem.value : '-';
-        document.getElementById('disp-solar').innerText = solar || '-';
-        document.getElementById('disp-lunar').innerText = lunar || '-';
-        document.getElementById('disp-marital').innerText = marital || '-';
-        document.getElementById('disp-children').innerText = childrenElem ? childrenElem.value : '-';
-        document.getElementById('disp-today').innerText = getTodayFormatted();
-    }
+        const solarDate = document.getElementById('solar-date').value;
+        if (!solarDate) {
+            missingFields.push('國曆出生年月日');
+        }
 
-    function setButtonsDisabled(disabled) {
-        const buttons = document.querySelectorAll('button.btn-png, button.btn-action');
-        buttons.forEach(btn => {
-            btn.disabled = disabled;
-        });
+        const maritalStatus = document.getElementById('marital-status').value;
+        if (!maritalStatus) {
+            missingFields.push('婚姻狀態');
+        }
+
+        const hasChildrenElem = document.querySelector('input[name="has-children"]:checked');
+        if (!hasChildrenElem) {
+            missingFields.push('是否有子女');
+        }
+
+        if (missingFields.length > 0) {
+            const missingListText = missingFields.map(item => `<div style="margin-top: 4px;">• ${item}</div>`).join('');
+            showCustomAlert(`記得選擇/填寫以下項目喔：<br>${missingListText}`);
+            return false;
+        }
+
+        return true;
     }
 
     function selectPieceFromPool(poolIndex) {
-        const pieceElem = document.getElementById(`pool-piece-${poolIndex}`);
-        if (pieceElem.style.opacity === '0.3') return;
+        if (currentDrawOrder > 32) return;
 
+        syncUserInfoDisplay();
+
+        const poolPieceElem = document.getElementById(`pool-piece-${poolIndex}`);
+        if (!poolPieceElem || poolPieceElem.style.visibility === 'hidden') return;
+
+        poolPieceElem.style.visibility = 'hidden';
         const pieceData = poolDeck[poolIndex];
 
-        // 捕捉第 4 支抽到的棋子（對應最上方的第 33 格）
         if (currentDrawOrder === 4) {
             fourthPieceData = pieceData;
         }
 
-        pieceElem.style.opacity = '0.3';
-        pieceElem.style.pointerEvents = 'none';
-
-        // 填入當前抽到的格子
-        const slotElem = document.getElementById(`board-slot-${currentDrawOrder}`);
-        if (slotElem) {
-            slotElem.innerHTML = '';
-            const placedPiece = document.createElement('div');
-            placedPiece.className = `chess-piece board-white ${pieceData.color}`;
-            placedPiece.innerText = pieceData.text;
-            slotElem.appendChild(placedPiece);
-        }
+        placePieceOnBoard(currentDrawOrder, pieceData);
 
         document.getElementById('draw-count').innerText = currentDrawOrder;
-        document.getElementById('latest-piece-info').innerText = `第 ${currentDrawOrder} 支抽到：【${pieceData.text}】`;
+        document.getElementById('latest-piece-info').innerText = `最新抽取：[ ${pieceData.text} ]`;
 
         currentDrawOrder++;
 
-        // 當點完第 32 支時，自動將第 4 支的棋子填入最上方的第 33 格
-        if (currentDrawOrder === 33 && fourthPieceData) {
-            const slot33Elem = document.getElementById(`board-slot-33`);
-            if (slot33Elem) {
-                slot33Elem.innerHTML = '';
-                const extraPiece = document.createElement('div');
-                extraPiece.className = `chess-piece board-white ${fourthPieceData.color}`;
-                extraPiece.innerText = fourthPieceData.text;
-                slot33Elem.appendChild(extraPiece);
-            }
-        }
-
-        if (currentDrawOrder > 32) {
-            document.getElementById('latest-piece-info').innerText = "🎉 32支象棋已全部抽取完成！";
+        if (currentDrawOrder === 33) {
+            placePieceOnBoard(33, fourthPieceData);
+            document.getElementById('latest-piece-info').innerText = "✨ 抽取完成！命盤已生成";
             setButtonsDisabled(false);
-            showCustomAlert("恭喜您！象棋命盤已全部抽取完成！<br>您可以檢視下方完整命盤，並點選按鈕下載圖片或傳送給凱特❤️");
+
+            setTimeout(() => {
+                document.getElementById('target-notice-area').scrollIntoView({ behavior: 'smooth' });
+            }, 300);
         }
     }
 
-    function generateImageModal() {
-        const chartArea = document.getElementById('chart-area');
-        
-        const originalBoxShadow = chartArea.style.boxShadow;
-        chartArea.style.boxShadow = 'none';
+    function placePieceOnBoard(slotNum, pieceData) {
+        const slotElem = document.getElementById(`board-slot-${slotNum}`);
+        if (!slotElem) return;
 
-        html2canvas(chartArea, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#fffdfa'
-        }).then(canvas => {
-            chartArea.style.boxShadow = originalBoxShadow;
-            const imgData = canvas.toDataURL('image/png');
-            document.getElementById('generated-image').src = imgData;
+        const pieceElem = document.createElement('div');
+        pieceElem.className = `chess-piece board-white ${pieceData.color}`;
+        pieceElem.innerText = pieceData.text;
+        slotElem.appendChild(pieceElem);
+    }
+
+    function syncUserInfoDisplay() {
+        const genderElem = document.querySelector('input[name="gender"]:checked');
+        const childrenElem = document.querySelector('input[name="has-children"]:checked');
+        const emailVal = document.getElementById('email').value.trim();
+        const emailWrapper = document.getElementById('disp-email-wrapper');
+
+        document.getElementById('disp-name').innerText = document.getElementById('name').value.trim() || '未填寫';
+        
+        if (emailVal) {
+            emailWrapper.style.display = 'block';
+            document.getElementById('disp-email').innerText = emailVal;
+        } else {
+            emailWrapper.style.display = 'none';
+        }
+
+        document.getElementById('disp-gender').innerText = genderElem ? genderElem.value : '未選擇';
+        document.getElementById('disp-solar').innerText = document.getElementById('solar-date').value || '未選擇';
+        document.getElementById('disp-lunar').innerText = document.getElementById('lunar-date-display').value || '未換算';
+        document.getElementById('disp-marital').innerText = document.getElementById('marital-status').value || '未選擇';
+        document.getElementById('disp-children').innerText = childrenElem ? childrenElem.value : '未選擇';
+        document.getElementById('disp-today').innerText = getTodayFormatted();
+    }
+
+    function setButtonsDisabled(disabled) {
+        document.querySelectorAll('.btn-png, .btn-action').forEach(btn => {
+            btn.disabled = disabled;
+        });
+    }
+
+    function generateImageModal() {
+        if (!validateFormFields(false)) {
+            return;
+        }
+
+        const target = document.getElementById('chart-area');
+        html2canvas(target, { scale: 3, useCORS: true }).then(canvas => {
+            const imgUrl = canvas.toDataURL('image/png');
+            document.getElementById('generated-image').src = imgUrl;
             document.getElementById('image-modal').style.display = 'flex';
-        }).catch(err => {
-            chartArea.style.boxShadow = originalBoxShadow;
-            showCustomAlert("圖片生成失敗，請嘗試使用手機內建截圖功能。");
         });
     }
 
     function closeImageModal(event) {
-        document.getElementById('image-modal').style.display = 'none';
+        if (event.target.id === 'image-modal') {
+            document.getElementById('image-modal').style.display = 'none';
+        }
     }
 
     function closeImageModalDirect() {
@@ -1081,55 +1123,95 @@
     }
 
     function sendEmailToKateViaJS(btnElem) {
-        const email = document.getElementById('email').value.trim();
-        if (!email) {
-            showCustomAlert("請先填寫您的電子信箱 (E-mail)，以便凱特收到後回覆解讀給您❤️");
+        if (!validateFormFields(true)) {
             return;
         }
 
-        const originalText = btnElem.innerHTML;
-        btnElem.disabled = true;
-        btnElem.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在傳送命盤...';
+        const userEmail = document.getElementById('email').value.trim();
 
-        const name = document.getElementById('name').value.trim() || '未填寫姓名';
-        const genderElem = document.querySelector('input[name="gender"]:checked');
-        const gender = genderElem ? genderElem.value : '未填寫';
-        const solar = document.getElementById('solar-date').value || '未填寫';
-        const lunar = document.getElementById('lunar-date-display').value || '未填寫';
-        const marital = document.getElementById('marital-status').value || '未填寫';
-        const childrenElem = document.querySelector('input[name="has-children"]:checked');
-        const children = childrenElem ? childrenElem.value : '未填寫';
-        const todayStr = getTodayFormatted();
+        const originalText = btnElem.innerText;
+        btnElem.innerText = "⏳ 傳送中...";
+        setButtonsDisabled(true);
 
-        let boardSummary = "";
-        for (let i = 1; i <= 33; i++) {
-            const slot = document.getElementById(`board-slot-${i}`);
-            if (slot && slot.children.length > 0) {
-                boardSummary += `第${i}支: ${slot.children[0].innerText}\n`;
-            }
-        }
+        // 產生保留圓形圖案與旁邊對應標籤的 Email 排盤結構
+        let htmlMatrix = `<table style="border-collapse: collapse; margin: 15px auto; font-family: sans-serif; text-align: center;">`;
+        
+        // 定義每一列對應的標籤（依據您提供的結構與範圍）
+        const rowLabels = {
+            0: "總格 (1-5支)",       // 第4格
+            1: "",                   // 第2, 1, 3格
+            2: "學習格 / 11-20歲",     // 第5格
+            3: "",                   // 第7, 6, 8格
+            4: "情感格 / 21-30歲",     // 第9格
+            5: "",                   // 第11, 10, 12格
+            6: "事業格 / 31-40歲",     // 第13格
+            7: "",                   // 第15, 14, 16格
+            8: "41-50歲",            // 第17格
+            9: "",                   // 第19, 18, 20格
+            10: "51-60歲",           // 第21格
+            11: "",                  // 第23, 22, 24格
+            12: "61-70歲",           // 第25格
+            13: "",                  // 第27, 26, 28格
+            14: "71-80歲",           // 第29格
+            15: "",                  // 第31, 30, 32格
+            16: ""                   // 第33格
+        };
+
+        BOARD_STRUCTURE.forEach((row, rowIndex) => {
+            htmlMatrix += `<tr>`;
+            
+            // 左側標籤欄位
+            const labelText = rowLabels[rowIndex] || "";
+            htmlMatrix += `<td style="padding: 4px 12px; font-size: 13px; color: #8b0000; font-weight: bold; text-align: right; white-space: nowrap; width: 130px;">${labelText}</td>`;
+
+            // 棋子排版欄位
+            row.forEach(slotNum => {
+                if (slotNum === null) {
+                    htmlMatrix += `<td style="width: 44px; height: 44px; padding: 2px;"></td>`;
+                } else {
+                    const slotElem = document.getElementById(`board-slot-${slotNum}`);
+                    if (slotElem && slotElem.firstElementChild) {
+                        const isRed = slotElem.firstElementChild.classList.contains('red');
+                        const pieceText = slotElem.firstElementChild.innerText;
+                        const colorStyle = isRed ? 'color: #cc0000; border: 2px solid #cc0000;' : 'color: #111111; border: 2px solid #333333;';
+                        
+                        htmlMatrix += `
+                            <td style="width: 44px; height: 44px; padding: 2px; text-align: center;">
+                                <div style="width: 38px; height: 38px; line-height: 38px; border-radius: 50%; font-size: 18px; font-weight: bold; background: #ffffff; ${colorStyle} margin: 0 auto;">
+                                    ${pieceText}
+                                </div>
+                            </td>
+                        `;
+                    } else {
+                        htmlMatrix += `<td style="width: 44px; height: 44px; padding: 2px;"></td>`;
+                    }
+                }
+            });
+            htmlMatrix += `</tr>`;
+        });
+        htmlMatrix += `</table>`;
 
         const templateParams = {
-            to_name: "凱特",
-            from_name: name,
-            from_email: email,
-            gender: gender,
-            solar_date: solar,
-            lunar_date: lunar,
-            marital_status: marital,
-            has_children: children,
-            draw_date: todayStr,
-            board_details: boardSummary
+            user_name: document.getElementById('name').value.trim(),
+            user_email: userEmail,
+            user_gender: (document.querySelector('input[name="gender"]:checked') || {}).value || '未選擇',
+            solar_date: document.getElementById('solar-date').value,
+            lunar_date: document.getElementById('lunar-date-display').value,
+            marital_status: document.getElementById('marital-status').value,
+            has_children: (document.querySelector('input[name="has-children"]:checked') || {}).value || '未選擇',
+            draw_date: getTodayFormatted(),
+            chess_matrix_html: htmlMatrix  // 帶入保留圓形棋子結構與左側標籤的表格
         };
 
         emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
             .then(function(response) {
-                btnElem.innerHTML = '✅ 傳送成功！';
-                showCustomAlert("命盤已成功傳送給凱特！<br>凱特收到後會盡快為您解讀，請留意您的電子信箱信件匣❤️");
+                showCustomAlert("✅ 命盤已成功傳送給凱特囉！你也要記得下載圖片檔至你的手機/電腦裡備存哦");
+                btnElem.innerText = originalText;
+                setButtonsDisabled(false);
             }, function(error) {
-                btnElem.disabled = false;
-                btnElem.innerHTML = originalText;
-                showCustomAlert("傳送失敗，請點選「下載命盤圖片」或自行截圖傳送給凱特，謝謝您！");
+                showCustomAlert("❌ 傳送失敗，請聯繫凱特：kate@katesuncourse.com");
+                btnElem.innerText = originalText;
+                setButtonsDisabled(false);
             });
     }
 </script>
