@@ -849,7 +849,7 @@
     ];
 
     const BOARD_STRUCTURE = [
-        [null, 33, null], // 命盤最上方（第33格，對應第4支抽的棋子：4上）
+        [null, 33, null], // 命盤最上方（第33格，對應第4支抽的棋子）
         [2, 1, 3],
         [null, 5, null],
         [7, 6, 8],
@@ -869,7 +869,7 @@
 
     let poolDeck = [];
     let currentDrawOrder = 1;
-    let fourthPieceData = null; // 記錄第4支抽到的棋子（4上）
+    let fourthPieceData = null; // 記錄第4支抽到的棋子
 
     window.onload = function() {
         startNewDivination();
@@ -1009,7 +1009,7 @@
 
         const pieceData = poolDeck[poolIndex];
 
-        // 捕捉第 4 支抽到的棋子（對應最上方的 4上 / 第33格）
+        // 捕捉第 4 支抽到的棋子（對應最上方的第 33 格）
         if (currentDrawOrder === 4) {
             fourthPieceData = pieceData;
         }
@@ -1032,7 +1032,7 @@
 
         currentDrawOrder++;
 
-        // 當點完第 32 支時，自動將第 4 支的棋子填入最上方的第 33 格（環狀收尾）
+        // 當點完第 32 支時，自動將第 4 支的棋子填入最上方的第 33 格
         if (currentDrawOrder === 33 && fourthPieceData) {
             const slot33Elem = document.getElementById(`board-slot-33`);
             if (slot33Elem) {
@@ -1047,7 +1047,7 @@
         if (currentDrawOrder > 32) {
             document.getElementById('latest-piece-info').innerText = "🎉 32支象棋已全部抽取完成！";
             setButtonsDisabled(false);
-            showCustomAlert("恭喜您！象棋命盤已全部抽取完成（最上方第 33 格已自動對應填入第 4 支棋子）！<br>您可以檢視下方完整命盤，並點選按鈕下載圖片或傳送給凱特❤️");
+            showCustomAlert("恭喜您！象棋命盤已全部抽取完成！<br>您可以檢視下方完整命盤，並點選按鈕下載圖片或傳送給凱特❤️");
         }
     }
 
