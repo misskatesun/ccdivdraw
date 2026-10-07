@@ -870,7 +870,7 @@
         [27, 26, 28],
         [null, 29, null],
         [31, 30, 32],
-        [null, 4, null]
+        [null, 33, null]
     ];
 
     let poolDeck = [];
@@ -1031,15 +1031,27 @@
             slotElem.appendChild(placedPiece);
         }
 
+        // 如果抽到第33支，自動將其填入最頂端對應的第4支位置
+        if (currentDrawOrder === 33 && firstPieceData) {
+            const slot4Elem = document.getElementById(`board-slot-4`);
+            if (slot4Elem) {
+                slot4Elem.innerHTML = '';
+                const extraPiece = document.createElement('div');
+                extraPiece.className = `chess-piece board-white ${firstPieceData.color}`;
+                extraPiece.innerText = firstPieceData.text;
+                slot4Elem.appendChild(extraPiece);
+            }
+        }
+
         document.getElementById('draw-count').innerText = currentDrawOrder;
         document.getElementById('latest-piece-info').innerText = `第 ${currentDrawOrder} 支抽到：【${pieceData.text}】`;
 
         currentDrawOrder++;
 
-        if (currentDrawOrder > 32) {
-            document.getElementById('latest-piece-info').innerText = "🎉 32支象棋已全部抽取完成！";
+        if (currentDrawOrder > 33) {
+            document.getElementById('latest-piece-info').innerText = "🎉 33支象棋已全部抽取完成！";
             setButtonsDisabled(false);
-            showCustomAlert("恭喜您！32支象棋已全部抽取完成！<br>您可以檢視下方完整命盤，並點選按鈕下載圖片或傳送給凱特❤️");
+            showCustomAlert("恭喜您！33支象棋已全部抽取完成！<br>您可以檢視下方完整命盤，並點選按鈕下載圖片或傳送給凱特❤️");
         }
     }
 
